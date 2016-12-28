@@ -19,6 +19,8 @@ class GFA:
         self.mu_v = np.zeros((self.factors, 1))
 
     def update_W(self):
+        # self.sigma_W[group,i,j]
+        # self.mu_W[group,column,i]
         pass
 
     def update_Z(self):
