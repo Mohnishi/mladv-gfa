@@ -93,27 +93,15 @@ class GFA:
     def get_alpha(self):
         return self.exp_alpha(self.U, self.V, self.mu_u, self.mu_v)
 
-    # <W(m) W(m)T>_k,k
-    def W_square_exp(self, m, k):
-        acc = 0
-        for i in range(self.D[m]):
-            acc += self.sigma_W[m][k,i] + self.m_W[m][k,i]**2
-        return acc
-
     def bound(self, U, V, mu_u, mu_v):
         ln_alpha = self.ln_alpha(U, V, mu_u, mu_v)
         alpha = np.exp(ln_alpha)
 
-        acc = 0
-        for m in range(self.groups):
-            for k in range(self.factors):
-                acc += self.D[m] * ln_alpha[m,k]
-                acc -= self.W_square_exp(m,k) * alpha[m,k]
+        bound = (sum((self.D[m] * ln_alpha[m,:] - np.diag(self.E_WW(m)) * alpha[m,:]).sum()
+                     for m in range(self.groups)) -
+                 self.lamb * (np.sum(U**2) + np.sum(V**2))) # lambda * (tr[UtU] + tr[VtV])
 
-        # lambda * (tr[UtU] + tr[VtV])
-        log_pUV = self.lamb * (np.sum(np.square(U)) + np.sum(np.square(V)))
-
-        return acc - log_pUV
+        return bound
 
     def get_A(self, U, V, mu_u, mu_v):
         # add singular dimension to broadcast correctly
