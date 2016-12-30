@@ -1,16 +1,19 @@
 
 import numpy as np
 import scipy as sp
+import scipy.optimize as opt
 
 class GFA:
 
     def __init__(self, rank=4, factors=7, max_iter=100, lamb=0.1,
-                 a_tau_prior=1e-14, b_tau_prior=1e-14):
+                 a_tau_prior=1e-14, b_tau_prior=1e-14, optimize_method="BFGS"):
         self.lamb = lamb
         self.rank = rank
         self.factors = factors
         self.a_tau_prior = a_tau_prior
         self.b_tau_prior = b_tau_prior
+
+        self.optimize_method=optimize_method
 
     # D: m x 1 - matrix
     # X: d x n - matrix
@@ -102,13 +105,12 @@ class GFA:
         return U,V,mu_u,mu_v
 
     def flatten_matrices(self,U,V,mu_u,mu_v):
-        flattened = list(map(np.ndarray.flatten, [U,V,mu_u,mu_v]))
-        return np.concatenate(flattened)
+        return np.concatenate([M.flatten() for M in [U,V,mu_u,mu_v]])
 
     def get_alpha(self):
         return self.exp_alpha(self.U, self.V, self.mu_u, self.mu_v)
 
-    def bound(self,x):
+    def bound(self,x,sign=1.0):
         U,V,mu_u,mu_v = self.recover_matrices(x)
         ln_alpha = self.ln_alpha(U, V, mu_u, mu_v)
         alpha = np.exp(ln_alpha)
@@ -117,29 +119,27 @@ class GFA:
                      for m in range(self.groups)) -
                  self.lamb * (np.sum(U**2) + np.sum(V**2))) # lambda * (tr[UtU] + tr[VtV])
 
-        return bound
+        return sign*bound
 
     def get_A(self, U, V, mu_u, mu_v):
         # add singular dimension to broadcast correctly
         return self.D[:,np.newaxis] - self.exp_alpha(U, V, mu_u, mu_v)
 
-    def grad(self,x):
+    def grad(self,x,sign=1.0):
         U,V,mu_u,mu_v = self.recover_matrices(x)
 
         A = self.get_A(U,V,mu_u,mu_v)
-        grad_U = A @ V + U * self.lamb
-        print(A.shape, U.shape, V.shape)
-        grad_V = np.transpose(A) @ U + V * self.lamb
-        grad_mu_u = A @ np.ones((self.factors,1))
-        grad_mu_v = np.transpose(A) @ np.ones((self.groups,1))
+        grad_U = (A @ V + U * self.lamb) * sign
+        grad_V = (A.T @ U + V * self.lamb) * sign
+        grad_mu_u = np.sum(A,axis=1) * sign
+        grad_mu_v = np.sum(A.T,axis=1) * sign
 
         return self.flatten_matrices(grad_U, grad_V, grad_mu_u, grad_mu_v)
 
     def update_alpha(self):
         x0 = self.flatten_matrices(self.U, self.V, self.mu_u, self.mu_v)
-        grad = self.grad(x0)
-        bound = self.bound(x0)
-        return bound, (self.recover_matrices(grad))
+        res = opt.minimize(self.bound, x0, args=(-1.0,), jac=self.grad, method=self.optimize_method, options={"disp": True})
+        return res
 
     def update_tau(self):
         self.b_tau = [self.b_tau_prior +
