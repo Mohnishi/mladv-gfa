@@ -53,7 +53,25 @@ class GFA:
             acc += self.sigma_W[m,k,i] + self.mu_W[m,k,i]**2
         return acc
 
-    def bound(self,U,V,mu_u,mu_v):
+    def recover_matrices(self,x):
+        prev = 0
+        U = x[prev:self.groups*self.rank].reshape((self.groups, self.rank))
+        prev += self.groups*self.rank
+        V = x[prev:prev+self.factors*self.rank].reshape((self.factors, self.rank))
+        prev += self.factors*self.rank
+        mu_u = x[prev:prev+self.groups].reshape((self.groups, 1))
+        prev += self.groups
+        mu_v = x[prev:prev+self.factors].reshape((self.factors, 1))
+
+        return U,V,mu_u,mu_v
+
+    def flatten_matrices(self,U,V,mu_u,mu_v):
+        flattened = list(map(np.ndarray.flatten, [U,V,mu_u,mu_v]))
+        return np.concatenate(flattened)
+
+    def bound(self,x):
+        U,V,mu_u,mu_v = self.recover_matrices(x)
+
         ln_alpha = self.ln_alpha(U,V,mu_u,mu_v)
         alpha = exp(ln_alpha)
 
@@ -71,19 +89,22 @@ class GFA:
     def get_A(self,U,V,mu_u,mu_v):
         return self.D @ np.ones((1, self.factors)) - self.alpha(U,V,mu_u,mu_v)
 
-    def grad(self,U,V,mu_u,mu_v):
+    def grad(self,x):
+        U,V,mu_u,mu_v = self.recover_matrices(x)
+
         A = self.get_A(U,V,mu_u,mu_v)
         grad_U = A @ V + U * self.lamb
         grad_V = np.transpose(A) @ U + V * self.lamb
         grad_mu_u = A @ np.ones((self.factors,1))
         grad_mu_v = np.transpose(A) @ np.ones((self.groups,1))
-        return (grad_U, grad_V, grad_mu_u, grad_mu_v)
 
-    # TODO: convert matrices to flat arrays for use in scipy.optimize
+        return self.flatten_matrices(grad_U, grad_V, grad_mu_u, grad_mu_v)
+
     def update_alpha(self):
-        grad = self.grad(self.U, self.V, self.mu_u, self.mu_v)
-        bound = self.bound(self.U, self.V, self.mu_u, self.mu_v)
-        return bound, grad
+        x0 = self.flatten_matrices(self.U, self.V, self.mu_u, self.mu_v)
+        grad = self.grad(x0)
+        bound = self.bound(x0)
+        return bound, (self.recover_matrices(grad))
 
     def update_tau(self):
         pass
