@@ -21,6 +21,11 @@ class GFA:
     # sum(D) = d
     def fit(self, X, D):
         self.init(X,D)
+        # do until convergence
+        self.update_W()
+        self.update_Z()
+        self.update_alpha()
+        self.update_tau()
 
     def init(self, X, D):
         assert D.sum() == X.shape[0]
@@ -139,7 +144,8 @@ class GFA:
     def update_alpha(self):
         x0 = self.flatten_matrices(self.U, self.V, self.mu_u, self.mu_v)
         res = opt.minimize(self.bound, x0, args=(-1.0,), jac=self.grad, method=self.optimize_method, options={"disp": True})
-        return res
+        self.U,self.V,self.mu_u,self.mu_v = self.recover_matrices(res.x)
+        self.alpha = self.get_alpha()
 
     def update_tau(self):
         self.b_tau = [self.b_tau_prior +
