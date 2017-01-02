@@ -3,6 +3,15 @@ import numpy as np
 import scipy as sp
 import scipy.optimize as opt
 
+
+def split_and_reshape(flattened, *args):
+    split_indices = np.cumsum([np.prod(shape) for shape in args])
+    arrays = np.split(flattened, split_indices[:-1])
+    return [arr.reshape(shape) for arr, shape in zip(arrays, args)]
+
+def flatten_matrices(*args):
+    return np.concatenate([M.flatten() for M in args])
+
 class GFA:
 
     def __init__(self, rank=4, factors=7, max_iter=100, lamb=0.1,
@@ -98,26 +107,15 @@ class GFA:
     def exp_alpha(self, U, V, mu_u, mu_v):
         return np.exp(self.ln_alpha(U, V, mu_u, mu_v))
 
-    def recover_matrices(self,x):
-        prev = 0
-        U = x[prev:self.groups*self.rank].reshape((self.groups, self.rank))
-        prev += self.groups*self.rank
-        V = x[prev:prev+self.factors*self.rank].reshape((self.factors, self.rank))
-        prev += self.factors*self.rank
-        mu_u = x[prev:prev+self.groups].reshape((self.groups, 1))
-        prev += self.groups
-        mu_v = x[prev:prev+self.factors].reshape((self.factors, 1))
-
-        return U,V,mu_u,mu_v
-
-    def flatten_matrices(self,U,V,mu_u,mu_v):
-        return np.concatenate([M.flatten() for M in [U,V,mu_u,mu_v]])
-
     def get_alpha(self):
         return self.exp_alpha(self.U, self.V, self.mu_u, self.mu_v)
 
-    def bound(self,x,sign=1.0):
-        U,V,mu_u,mu_v = self.recover_matrices(x)
+    def recover_matrices(self, x):
+        return split_and_reshape(x, (self.groups, self.rank), (self.factors, self.rank),
+                                 (self.groups, 1), (self.factors, 1))
+
+    def bound(self, x):
+        U, V, mu_u, mu_v = self.recover_matrices(x)
         ln_alpha = self.ln_alpha(U, V, mu_u, mu_v)
         alpha = np.exp(ln_alpha)
 
@@ -125,31 +123,26 @@ class GFA:
                      for m in range(self.groups)) -
                  self.lamb * (np.sum(U**2) + np.sum(V**2))) # lambda * (tr[UtU] + tr[VtV])
 
-        val = sign*bound
         if self.debug:
             print("Objective eval:")
-            print("Bound: {}".format(val))
+            print("Bound: {}".format(bound))
             print("Ln alpha:")
             print(ln_alpha)
-        return val
+        return -bound
 
-    def get_A(self, U, V, mu_u, mu_v):
-        # add singular dimension to broadcast correctly
-        return self.D[:,np.newaxis] - self.exp_alpha(U, V, mu_u, mu_v)
+    def grad(self, x):
+        U, V, mu_u, mu_v = self.recover_matrices(x)
 
-    def grad(self,x,sign=1.0):
-        U,V,mu_u,mu_v = self.recover_matrices(x)
+        A = self.D[:,np.newaxis] - self.exp_alpha(U, V, mu_u, mu_v)
+        grad_U = -(A @ V + U * self.lamb)
+        grad_V = -(A.T @ U + V * self.lamb)
+        grad_mu_u = -np.sum(A,axis=1)
+        grad_mu_v = -np.sum(A.T,axis=1)
 
-        A = self.get_A(U,V,mu_u,mu_v)
-        grad_U = (A @ V + U * self.lamb) * sign
-        grad_V = (A.T @ U + V * self.lamb) * sign
-        grad_mu_u = np.sum(A,axis=1) * sign
-        grad_mu_v = np.sum(A.T,axis=1) * sign
-
-        return self.flatten_matrices(grad_U, grad_V, grad_mu_u, grad_mu_v)
+        return flatten_matrices(grad_U, grad_V, grad_mu_u, grad_mu_v)
 
     def opt_debug(self,x):
-        U,V,mu_u,mu_v = self.recover_matrices(x)
+        U, V, mu_u, mu_v = self.recover_matrices(x)
         print("U:\n", U)
         print("V:\n", U)
         print("mu_u\n", mu_u)
@@ -157,12 +150,13 @@ class GFA:
         print("Ln alpha\n", self.ln_alpha(U,V,mu_u,mu_v))
 
     def update_alpha(self):
-        x0 = self.flatten_matrices(self.U, self.V, self.mu_u, self.mu_v)
+        x0 = flatten_matrices(self.U, self.V, self.mu_u, self.mu_v)
         if self.debug:
             print("Values before")
             self.opt_debug(x0)
 
-        res = opt.minimize(self.bound, x0, args=(-1.0,), jac=self.grad, callback=self.opt_debug, method=self.optimize_method, options={"disp": True})
+        res = opt.minimize(self.bound, x0, jac=self.grad, callback=self.opt_debug,
+                           method=self.optimize_method, options={"disp": True})
         self.U,self.V,self.mu_u,self.mu_v = self.recover_matrices(res.x)
         self.alpha = self.get_alpha()
 
@@ -179,4 +173,4 @@ class GFA:
                       1/2 * (np.trace(self.X[m] @ self.X[m].T) +
                              np.trace(- 2*self.E_W(m) @ self.X[m] @ self.E_Z().T +
                                       self.E_WW(m) @ self.E_ZZ()))
-            for m in range(self.groups)]
+                      for m in range(self.groups)]
