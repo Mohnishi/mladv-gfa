@@ -6,14 +6,15 @@ import scipy.optimize as opt
 class GFA:
 
     def __init__(self, rank=4, factors=7, max_iter=100, lamb=0.1,
-                 a_tau_prior=1e-14, b_tau_prior=1e-14, optimize_method="BFGS"):
+                 a_tau_prior=1e-14, b_tau_prior=1e-14, optimize_method="BFGS", debug=False):
         self.lamb = lamb
         self.rank = rank
         self.factors = factors
         self.a_tau_prior = a_tau_prior
         self.b_tau_prior = b_tau_prior
 
-        self.optimize_method=optimize_method
+        self.optimize_method = optimize_method
+        self.debug = debug
 
     # D: m x 1 - matrix
     # X: d x n - matrix
@@ -124,7 +125,13 @@ class GFA:
                      for m in range(self.groups)) -
                  self.lamb * (np.sum(U**2) + np.sum(V**2))) # lambda * (tr[UtU] + tr[VtV])
 
-        return sign*bound
+        val = sign*bound
+        if self.debug:
+            print("Objective eval:")
+            print("Bound: {}".format(val))
+            print("Ln alpha:")
+            print(ln_alpha)
+        return val
 
     def get_A(self, U, V, mu_u, mu_v):
         # add singular dimension to broadcast correctly
@@ -141,11 +148,30 @@ class GFA:
 
         return self.flatten_matrices(grad_U, grad_V, grad_mu_u, grad_mu_v)
 
+    def opt_debug(self,x):
+        U,V,mu_u,mu_v = self.recover_matrices(x)
+        print("U:\n", U)
+        print("V:\n", U)
+        print("mu_u\n", mu_u)
+        print("mu_v\n", mu_v)
+        print("Ln alpha\n", self.ln_alpha(U,V,mu_u,mu_v))
+
     def update_alpha(self):
         x0 = self.flatten_matrices(self.U, self.V, self.mu_u, self.mu_v)
-        res = opt.minimize(self.bound, x0, args=(-1.0,), jac=self.grad, method=self.optimize_method, options={"disp": True})
+        if self.debug:
+            print("Values before")
+            self.opt_debug(x0)
+
+        res = opt.minimize(self.bound, x0, args=(-1.0,), jac=self.grad, callback=self.opt_debug, method=self.optimize_method, options={"disp": True})
         self.U,self.V,self.mu_u,self.mu_v = self.recover_matrices(res.x)
         self.alpha = self.get_alpha()
+
+        if self.debug:
+            print("Values After")
+            self.opt_debug(res.x)
+            print("Gradients After")
+            self.opt_debug(res.jac)
+
         return res # just for testing purposes
 
     def update_tau(self):
