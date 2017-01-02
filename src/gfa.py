@@ -146,6 +146,7 @@ class GFA:
         res = opt.minimize(self.bound, x0, args=(-1.0,), jac=self.grad, method=self.optimize_method, options={"disp": True})
         self.U,self.V,self.mu_u,self.mu_v = self.recover_matrices(res.x)
         self.alpha = self.get_alpha()
+        return res # just for testing purposes
 
     def update_tau(self):
         self.b_tau = [self.b_tau_prior +
