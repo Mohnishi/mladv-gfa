@@ -76,6 +76,10 @@ class GFA:
         """Calculate E[W(m) W(m).T]"""
         return self.D[m] * self.sigma_W[m] + self.m_W[m] @ self.m_W[m].T
 
+    def E_WW_diag(self):
+        """Calculate diagonal of E_WW for all groups"""
+        return np.array([np.diag(self.E_WW(m)) for m in range(self.groups)])
+
     def E_Z(self):
         """Calculate E[Z]"""
         return self.m_Z
@@ -121,23 +125,24 @@ class GFA:
 
         bound = (sum((self.D[m] * ln_alpha[m,:] - np.diag(self.E_WW(m)) * alpha[m,:]).sum()
                      for m in range(self.groups)) -
-                 self.lamb * (np.sum(U**2) + np.sum(V**2))) # lambda * (tr[UtU] + tr[VtV])
+                 self.lamb * (np.sum(U**2) + np.sum(V**2)))
 
         if self.debug:
             print("Objective eval:")
-            print("Bound: {}".format(bound))
+            print("Bound: {}".format(-bound))
             print("Ln alpha:")
             print(ln_alpha)
-        return -bound
+        return -bound/2
 
     def grad(self, x):
         U, V, mu_u, mu_v = self.recover_matrices(x)
 
-        A = self.D[:,np.newaxis] - self.exp_alpha(U, V, mu_u, mu_v)
-        grad_U = -(A @ V + U * self.lamb)
-        grad_V = -(A.T @ U + V * self.lamb)
-        grad_mu_u = -np.sum(A,axis=1)
-        grad_mu_v = -np.sum(A.T,axis=1)
+        # E_WW used in CCAGFA package at CRAN
+        A = self.D[:,np.newaxis] - self.exp_alpha(U, V, mu_u, mu_v)*self.E_WW_diag()
+        grad_U = -(A @ V - U * 2 * self.lamb)/2
+        grad_V = -(A.T @ U - V * 2 * self.lamb)/2
+        grad_mu_u = -np.sum(A,axis=1)/2
+        grad_mu_v = -np.sum(A,axis=0)/2
 
         return flatten_matrices(grad_U, grad_V, grad_mu_u, grad_mu_v)
 
@@ -155,7 +160,7 @@ class GFA:
             print("Values before")
             self.opt_debug(x0)
 
-        res = opt.minimize(self.bound, x0, jac=self.grad, callback=self.opt_debug,
+        res = opt.minimize(self.bound, x0, jac=self.grad,
                            method=self.optimize_method, options={"disp": True})
         self.U,self.V,self.mu_u,self.mu_v = self.recover_matrices(res.x)
         self.alpha = self.get_alpha()
