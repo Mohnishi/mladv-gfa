@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.special
 import scipy.optimize as opt
 
 def split_and_reshape(flattened, *args):
@@ -75,6 +76,10 @@ class GFA:
     def E_tau(self, m):
         """Calculate E[tau(m)]"""
         return self.a_tau[m] / self.b_tau[m]
+
+    def E_logtau(self, m):
+        """Calculate E[log tau(m)]"""
+        return scipy.special.digamma(self.a_tau[m]) - np.log(self.b_tau[m])
 
     def E_W(self, m):
         """Calculate E[W(m)]"""
@@ -165,10 +170,11 @@ class GFA:
     def opt_debug(self,x):
         U, V, mu_u, mu_v = self.recover_matrices(x)
         print("U:\n", U)
-        print("V:\n", U)
+        print("V:\n", V)
         print("mu_u\n", mu_u)
         print("mu_v\n", mu_v)
         print("Ln alpha\n", self.ln_alpha(U,V,mu_u,mu_v))
+        print("Bound:\n", self.bound(x))
 
     def update_alpha(self):
         """Update alpha using joint numerical optimization over
