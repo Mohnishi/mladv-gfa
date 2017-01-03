@@ -1,15 +1,14 @@
-
 import numpy as np
-import scipy as sp
 import scipy.optimize as opt
 
-
 def split_and_reshape(flattened, *args):
+    """Restore matrices of shapes in 'args' from a flattened 1D vector"""
     split_indices = np.cumsum([np.prod(shape) for shape in args])
     arrays = np.split(flattened, split_indices[:-1])
     return [arr.reshape(shape) for arr, shape in zip(arrays, args)]
 
 def flatten_matrices(*args):
+    """Flatten matrices in 'args' to single 1D vector"""
     return np.concatenate([M.flatten() for M in args])
 
 class GFA:
@@ -25,13 +24,20 @@ class GFA:
         self.optimize_method = optimize_method
         self.debug = debug
 
-    # D: m x 1 - matrix
-    # X: d x n - matrix
-    # Z: k x n - matrix
-    # sum(D) = d
     def fit(self, X, D):
+        """Infer latent variables from data and group divisions
+
+        Input:
+        X: data array of size d x N, where d is the amount of variables and
+           N is the sample size
+        D: 1D array specifying the group divisions, i.e. D = [2,3] would mean there
+           are two groups, corresponding to variables 1-2 and 3-5 respectively
+
+        Output:
+        After running, the inferred parameters will be available as fields
+        """
         self.init(X,D)
-        # do until convergence
+        # TODO: compute lower bound as convergence metric
         self.update_W()
         self.update_Z()
         self.update_alpha()
@@ -39,6 +45,7 @@ class GFA:
 
     def init(self, X, D):
         assert D.sum() == X.shape[0]
+
         self.groups = len(D)
         split_indices = np.add.accumulate(D[:-1])
         self.X = np.split(X, split_indices)
@@ -64,6 +71,7 @@ class GFA:
         self.a_tau = self.a_tau_prior + self.D * self.N / 2
         self.b_tau = self.a_tau
 
+    # NOTE: all expectations with regard to q
     def E_tau(self, m):
         """Calculate E[tau(m)]"""
         return self.a_tau[m] / self.b_tau[m]
@@ -73,11 +81,15 @@ class GFA:
         return self.m_W[m]
 
     def E_WW(self, m):
-        """Calculate E[W(m) W(m).T]"""
+        """Calculate E[W(m) W(m).T]
+        Size = K x K
+        """
         return self.D[m] * self.sigma_W[m] + self.m_W[m] @ self.m_W[m].T
 
     def E_WW_diag(self):
-        """Calculate diagonal of E_WW for all groups"""
+        """Calculate diagonal of E_WW for all groups
+        Size = M x K
+        """
         return np.array([np.diag(self.E_WW(m)) for m in range(self.groups)])
 
     def E_Z(self):
@@ -90,6 +102,12 @@ class GFA:
 
     # TODO: document simplification of formulas
     def update_W(self):
+        """Update W, i.e. update the mean m_W and covariance sigma_W
+        of variational distribution
+
+        sigma_W : M-sized vector with K x K-arrays
+        m_W : M-sized vector with K x Dm-arrays, Dm = dimentionality of group
+        """
         self.sigma_W = [
             np.linalg.inv(self.E_tau(m) * self.E_ZZ() + np.diag(self.alpha[m]))
             for m in range(self.groups)]
@@ -102,7 +120,6 @@ class GFA:
                                          for m in range(self.groups)))
         self.m_Z = self.sigma_Z @ sum(self.E_tau(m) * self.E_W(m) @ self.X[m]
                                       for m in range(self.groups))
-
 
     def ln_alpha(self, U, V, mu_u, mu_v):
         # this is equivalent to the original formula thanks to broadcasting
@@ -118,7 +135,10 @@ class GFA:
         return split_and_reshape(x, (self.groups, self.rank), (self.factors, self.rank),
                                  (self.groups, 1), (self.factors, 1))
 
-    def bound(self, x):
+    def bound_uv(self, x):
+        """Return the lower bound as function of U,V,mu_u,mu_v
+        ignoring constant terms"""
+
         U, V, mu_u, mu_v = self.recover_matrices(x)
         ln_alpha = self.ln_alpha(U, V, mu_u, mu_v)
         alpha = np.exp(ln_alpha)
@@ -127,17 +147,13 @@ class GFA:
                      for m in range(self.groups)) -
                  self.lamb * (np.sum(U**2) + np.sum(V**2)))
 
-        if self.debug:
-            print("Objective eval:")
-            print("Bound: {}".format(-bound))
-            print("Ln alpha:")
-            print(ln_alpha)
         return -bound/2
 
-    def grad(self, x):
+    def grad_uv(self, x):
+        """Return the gradient of U,V,mu_u,mu_v"""
+
         U, V, mu_u, mu_v = self.recover_matrices(x)
 
-        # E_WW used in CCAGFA package at CRAN
         A = self.D[:,np.newaxis] - self.exp_alpha(U, V, mu_u, mu_v)*self.E_WW_diag()
         grad_U = -(A @ V - U * 2 * self.lamb)/2
         grad_V = -(A.T @ U - V * 2 * self.lamb)/2
@@ -155,23 +171,20 @@ class GFA:
         print("Ln alpha\n", self.ln_alpha(U,V,mu_u,mu_v))
 
     def update_alpha(self):
-        x0 = flatten_matrices(self.U, self.V, self.mu_u, self.mu_v)
-        if self.debug:
-            print("Values before")
-            self.opt_debug(x0)
+        """Update alpha using joint numerical optimization over
+        U, V, mu_u and mu_v
 
-        res = opt.minimize(self.bound, x0, jac=self.grad,
+        Output:
+        returns an OptimizeResult from scipy for debugging purposes
+        """
+        x0 = flatten_matrices(self.U, self.V, self.mu_u, self.mu_v)
+
+        res = opt.minimize(self.bound_uv, x0, jac=self.grad_uv,
                            method=self.optimize_method, options={"disp": True})
         self.U,self.V,self.mu_u,self.mu_v = self.recover_matrices(res.x)
         self.alpha = self.get_alpha()
 
-        if self.debug:
-            print("Values After")
-            self.opt_debug(res.x)
-            print("Gradients After")
-            self.opt_debug(res.jac)
-
-        return res # just for testing purposes
+        return res
 
     def update_tau(self):
         self.b_tau = [self.b_tau_prior +
