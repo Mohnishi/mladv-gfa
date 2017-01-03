@@ -14,7 +14,7 @@ def flatten_matrices(*args):
 
 def trprod(A, B):
     """Calculates tr(AB) efficiently using the
-    hamilton product"""
+    Hadamard product"""
     return (A.T * B).sum()
 
 class GFA:
