@@ -12,6 +12,11 @@ def flatten_matrices(*args):
     """Flatten matrices in 'args' to single 1D vector"""
     return np.concatenate([M.flatten() for M in args])
 
+def trprod(A, B):
+    """Calculates tr(AB) efficiently using the
+    hamilton product"""
+    return (A.T * B).sum()
+
 class GFA:
 
     def __init__(self, rank=4, factors=7, max_iter=100, lamb=0.1,
