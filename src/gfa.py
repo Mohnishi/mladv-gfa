@@ -20,7 +20,8 @@ def trprod(A, B):
 class GFA:
 
     def __init__(self, rank=4, factors=7, max_iter=100, lamb=0.1,
-                 a_tau_prior=1e-14, b_tau_prior=1e-14, optimize_method="BFGS", debug=False):
+                 a_tau_prior=1e-14, b_tau_prior=1e-14,
+                 tol=1e-2, optimize_method="BFGS", debug=False):
         self.lamb = lamb
         self.rank = rank
         self.factors = factors
@@ -28,6 +29,7 @@ class GFA:
         self.b_tau_prior = b_tau_prior
 
         self.optimize_method = optimize_method
+        self.tol = tol
         self.debug = debug
 
     def fit(self, X, D):
@@ -42,8 +44,27 @@ class GFA:
         Output:
         After running, the inferred parameters will be available as fields
         """
+
         self.init(X,D)
-        # TODO: compute lower bound as convergence metric
+        self.update_params()
+        prev_bound = self.bound(debug=True)
+
+        it = 1
+        while True:
+            self.update_params()
+            new_bound = self.bound()
+            if np.abs(new_bound - prev_bound) < self.tol:
+                prev_bound = new_bound
+                break
+            prev_bound = new_bound
+            it += 1
+
+        if self.debug:
+            print("Successful fit")
+            print("{} iterations".format(it))
+            print("Maximal lower bound: {}".format(prev_bound))
+
+    def update_params(self):
         self.update_W()
         self.update_Z()
         self.update_alpha()
@@ -76,6 +97,48 @@ class GFA:
         # a_tau is constant; set b_tau to a_tau so that E[tau] = 1
         self.a_tau = self.a_tau_prior + self.D * self.N / 2
         self.b_tau = self.a_tau
+
+    def bound(self, debug=False):
+        """Get current lower bound of marginal p(Y)
+           (may ignore constants with respect to parameters)"""
+
+        # calculate E[log p(X, Theta)]
+        p_X = sum((self.N * self.D[m]/2 * self.E_logtau(m) - self.E_tau(m)/2 * (
+                np.trace(self.X[m] @ self.X[m].T) -
+                2 * np.trace(self.E_W(m).T @ self.E_Z() @ self.X[m].T) +
+                np.trace(self.E_WW(m) @ self.E_ZZ()))
+            for m in range(self.groups)))
+
+        p_Z = -1/2 * np.trace(self.E_ZZ())
+
+        p_tau = sum(((self.a_tau[m] - 1) * self.E_logtau(m)
+                - self.b_tau[m]*self.E_tau(m))
+            for m in range(self.groups))
+
+        p_W = (1/2 * (self.D @ np.sum(np.log(self.alpha), axis=1)
+                - np.trace(self.alpha.T @ self.E_WW_diag())))
+
+        p_U = -self.lamb/2 * np.sum(self.U**2)
+        p_V = -self.lamb/2 * np.sum(self.V**2)
+
+        p = p_X + p_Z + p_tau + p_W + p_U + p_V
+
+        # calculate E[-log q(Theta)] (entropy)
+        ent_Z = (self.N/2 * np.log((2*np.pi*np.exp(1))**self.factors *
+            np.linalg.det(self.sigma_Z)))
+
+
+        ent_tau = sum((self.a_tau[m] - np.log(self.b_tau[m]) +
+                scipy.special.gammaln(self.a_tau[m]) +
+                (1 - self.a_tau[m])*scipy.special.digamma(self.a_tau[m])
+            for m in range(self.groups)))
+
+        ent_W = sum((self.D[m]/2 * np.log( (2*np.pi*np.exp(1))**self.factors *
+                np.linalg.det(self.sigma_W[m]))
+            for m in range(self.groups)))
+
+        ent = ent_Z + ent_tau + ent_W
+        return p + ent
 
     # NOTE: all expectations with regard to q
     def E_tau(self, m):
@@ -191,7 +254,7 @@ class GFA:
         x0 = flatten_matrices(self.U, self.V, self.mu_u, self.mu_v)
 
         res = opt.minimize(self.bound_uv, x0, jac=self.grad_uv,
-                           method=self.optimize_method, options={"disp": True})
+                           method=self.optimize_method)
         self.U,self.V,self.mu_u,self.mu_v = self.recover_matrices(res.x)
         self.alpha = self.get_alpha()
 
