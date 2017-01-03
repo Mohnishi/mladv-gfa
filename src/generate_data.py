@@ -44,15 +44,15 @@ def get_alpha(U, V):
 
 def get_w(D, alpha):
     """ Sampling W from Gaussian(0, 1/alpha)
-    Size W = D x K 
+    Size W = K x D
     """
     offset = 0
-    W = np.ones([sum(D), alpha.shape[1]])
+    W = np.ones([alpha.shape[1], sum(D)])
     for dm in range(len(D)):
         for k in range(alpha.shape[1]):
             m = np.zeros(D[dm])
             s = np.eye(D[dm]) / alpha[dm,k]
-            W[offset:offset+D[dm],k] = multivariate_normal(m, s)
+            W[k, offset:offset+D[dm]] = multivariate_normal(m, s)
         offset += D[dm]
     return W
 
@@ -74,9 +74,8 @@ def generate_x(Z, W, D, Tau, N):
     offset = 0
     X = np.zeros([sum(D), N])
     for i in range(len(D)):
-        m = np.dot(W[offset:offset + D[i], :], Z[:,i])
+        m = np.dot(W[:, offset:offset + D[i]], Z[:,i])
         s = np.eye(D[i]) / Tau[i]
-        print(s)
         X[offset:offset + D[i], :] = multivariate_normal(m, s, N).T
         offset = offset + D[i]
     return X
@@ -90,6 +89,7 @@ def generate_z(K, N):
 
 def generation(N, K, D, R):
     """ Complete generation of the data
+    Output :
     Size X = D x N
     Size W = D x K
     Size Z = K x N
