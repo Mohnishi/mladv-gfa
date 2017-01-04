@@ -102,7 +102,8 @@ class GFA:
 
         # initialize q(Z)
         # TODO: investigate effect of initialization
-        self.sigma_Z = np.eye(self.factors) + 0.1
+        sig = np.random.randn(self.factors, self.factors)
+        self.sigma_Z = sig @ sig.T
         self.m_Z = np.random.randn(self.factors, self.N)
 
         # initialize q(tau)
@@ -271,7 +272,8 @@ class GFA:
         Output:
         returns an OptimizeResult from scipy for debugging purposes
         """
-        x0 = flatten_matrices(self.U, self.V, self.mu_u, self.mu_v)
+        x0 = np.zeros(np.prod(self.U.shape) + np.prod(self.V.shape) +
+                      np.prod(self.mu_u.shape) + np.prod(self.mu_v.shape))
 
         res = opt.minimize(self.bound_uv, x0, jac=self.grad_uv,
                            method=self.optimize_method)
