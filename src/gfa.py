@@ -19,7 +19,7 @@ def trprod(A, B):
 
 class GFA:
 
-    def __init__(self, rank=4, factors=7, max_iter=100, lamb=0.1,
+    def __init__(self, rank=4, factors=7, max_iter=1000, lamb=0.1,
                  a_tau_prior=1e-14, b_tau_prior=1e-14,
                  tol=1e-2, optimize_method="BFGS", debug=False):
         self.lamb = lamb
@@ -30,6 +30,7 @@ class GFA:
 
         self.optimize_method = optimize_method
         self.tol = tol
+        self.max_iter = max_iter
         self.debug = debug
 
     def fit(self, X, D):
@@ -47,21 +48,27 @@ class GFA:
 
         self.init(X,D)
         self.update_params()
-        prev_bound = self.bound(debug=True)
+        prev_bound = self.bound()
 
-        it = 1
-        while True:
+        for i in range(1, self.max_iter + 1):
             self.update_params()
             new_bound = self.bound()
+
             if np.abs(new_bound - prev_bound) < self.tol:
                 prev_bound = new_bound
+                if self.debug:
+                    print("Successful fit")
                 break
+
             prev_bound = new_bound
-            it += 1
+
+            if (i == 1 or i % 10 == 0) and self.debug:
+                print("Lower bound at iteration {}: {}".format(i, prev_bound))
+        else: # nobreak
+            print("Reach the maximum number of iterations")
 
         if self.debug:
-            print("Successful fit")
-            print("{} iterations".format(it))
+            print("Took {} iterations".format(i))
             print("Maximal lower bound: {}".format(prev_bound))
 
     def update_params(self):
@@ -98,7 +105,7 @@ class GFA:
         self.a_tau = self.a_tau_prior + self.D * self.N / 2
         self.b_tau = self.a_tau
 
-    def bound(self, debug=False):
+    def bound(self):
         """Get current lower bound of marginal p(Y)
            (may ignore constants with respect to parameters)"""
 
