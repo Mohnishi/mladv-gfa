@@ -27,11 +27,11 @@ g = gfa.GFA(optimize_method="bfgs", debug=True)
 g.fit(X,D)
 
 # Get estimated W (West)
-West = g.m_W
+West = g.m_W 
 # Extract groups of estimated projection mappings
-West1 = g.m_W[0]
-West2 = g.m_W[1]
-West3 = g.m_W[2]
+West1 = West[0]
+West2 = West[1]
+West3 = West[2]
 
 
 # Visualize the group 1 of the true projection mappings 
