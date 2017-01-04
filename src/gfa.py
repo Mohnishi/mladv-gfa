@@ -81,7 +81,9 @@ class GFA:
         assert D.sum() == X.shape[0]
 
         # normalize rows (variables) to zero mean and unit variance
-        X = (X - X.mean(axis=1, keepdims=True)) / X.std(axis=1, keepdims=True)
+        self.X_mean = X.mean(axis=1, keepdims=True)
+        self.X_std = X.std(axis=1, keepdims=True)
+        X = (X - self.X_mean) / self.X_std
 
         self.groups = len(D)
         split_indices = np.add.accumulate(D[:-1])
@@ -107,6 +109,14 @@ class GFA:
         # a_tau is constant; set b_tau to a_tau so that E[tau] = 1
         self.a_tau = self.a_tau_prior + self.D * self.N / 2
         self.b_tau = self.a_tau
+
+    def get_W(self):
+        W = np.hstack([self.E_W(m) for m in range(self.groups)])
+        # scale W using saved std
+        return W * self.X_std.T
+
+    def get_Z(self):
+        return self.E_Z()
 
     def bound(self):
         """Get current lower bound of marginal p(Y)
