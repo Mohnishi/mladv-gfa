@@ -80,6 +80,9 @@ class GFA:
     def init(self, X, D):
         assert D.sum() == X.shape[0]
 
+        # normalize rows (variables) to zero mean and unit variance
+        X = (X - X.mean(axis=1, keepdims=True)) / X.std(axis=1, keepdims=True)
+
         self.groups = len(D)
         split_indices = np.add.accumulate(D[:-1])
         self.X = np.split(X, split_indices)
