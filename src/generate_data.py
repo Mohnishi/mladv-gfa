@@ -26,7 +26,7 @@ def generate_UV(M, K, R):
     U = normal(0, sigma, [M, R])
     V = normal(0, sigma, [K, R])
     return U, V
-    
+
 def get_alpha(U, V):
     """ Compute the alpha and A = log(alpha)
     Size A = M x K
@@ -35,9 +35,9 @@ def get_alpha(U, V):
     m_u = np.mean(U, axis=1)
     m_v = np.mean(V, axis=1)
     m_u = m_u[:, np.newaxis]
-    m_v = m_v[:, np.newaxis]    
+    m_v = m_v[:, np.newaxis]
     oneK = np.ones([V.shape[0], 1])
-    oneM = np.ones([U.shape[0], 1])    
+    oneM = np.ones([U.shape[0], 1])
     A = np.dot(U, V.T) + np.dot(m_u, oneK.T) + np.dot(oneM, m_v.T)
     alpha = np.exp(A)
     return A, alpha
@@ -79,7 +79,7 @@ def generate_x(Z, W, D, Tau, N):
         X[offset:offset + D[i], :] = multivariate_normal(m, s, N).T
         offset = offset + D[i]
     return X
-    
+
 
 def generate_z(K, N):
     """ Sampling z from Gaussian(0, I)

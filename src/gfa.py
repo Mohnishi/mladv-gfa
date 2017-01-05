@@ -277,6 +277,9 @@ class GFA:
 
         res = opt.minimize(self.bound_uv, x0, jac=self.grad_uv,
                            method=self.optimize_method)
+        if not res.success and self.debug:
+            print("Optmization failure")
+
         self.U,self.V,self.mu_u,self.mu_v = self.recover_matrices(res.x)
         self.alpha = self.get_alpha()
 
