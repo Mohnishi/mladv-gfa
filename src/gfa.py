@@ -17,6 +17,25 @@ def trprod(A, B):
     Hadamard product"""
     return (A.T * B).sum()
 
+def GFA_rep(X, D, n=10, **kwargs):
+    """Fits the GFA model n times and returns the best fit (maximum lower bound)"""
+
+    models = []
+    for i in range(n):
+        if kwargs["debug"]:
+            print("Fitting model {}...".format(i))
+        g = GFA(**kwargs)
+        g.fit(X,D)
+        if kwargs["debug"]:
+            print("Bound:", g.bound())
+        models.append(g)
+
+    max_model = max(models, key=lambda g:g.bound())
+    index, model = max(enumerate(models), key=lambda x:x[1].bound())
+    if kwargs["debug"]:
+        print("Returning model {} at bound {}".format(index, model.bound()))
+    return model
+
 class GFA:
 
     def __init__(self, rank=4, factors=7, max_iter=1000, lamb=0.1,
@@ -70,6 +89,8 @@ class GFA:
         if self.debug:
             print("Took {} iterations".format(i))
             print("Maximal lower bound: {}".format(prev_bound))
+        # for debugging calling code
+        self.iters = 10
 
     def update_params(self):
         self.update_W()
