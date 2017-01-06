@@ -1,0 +1,28 @@
+# generate figure 3 similar to one found in the paper
+import numpy as np
+import random
+from genr import *
+tau = 10
+R = 3
+K = 7
+D = np.array([10,10,10]) #groups     np.array([2,4,4])
+N = 100
+
+# make some columns W completely zero
+W = np.zeros((K, sum(D)))
+
+for k in range(K):
+    # keep some groups all zero
+    base = 0
+    for m in range(len(D)):
+        if random.getrandbits(1):
+            W[k,base:base+D[m]] = np.random.normal(loc=0, scale=1, size=D[m])
+        base += D[m]
+
+# random Z
+Z = np.random.normal(loc=0, scale=1, size=(K, N))
+
+# X from W and Z
+X = W.T @ Z + np.random.normal(loc=0, scale=np.sqrt(1/tau), size=(sum(D), N))
+
+print_to_R(X, D, R, K)
