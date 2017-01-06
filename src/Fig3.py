@@ -1,4 +1,3 @@
-%matplotlib inline
 import importlib
 import gfa
 importlib.reload(gfa)
