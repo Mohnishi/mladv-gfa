@@ -64,9 +64,9 @@ visualize.plot_W(W.T)
 #	for d in range(10):
 #		plt.scatter(k+1,d+1,s=W1[k,d],color='black', marker = 's')
 
-plt.title("True W - Group 1")
-plt.ylabel("K axis")
-plt.xlabel("Dm axis")
+plt.title("True W ")
+plt.xlabel("K axis")
+plt.ylabel("D axis")
 
 
 plt.subplot(1, 2, 2)
