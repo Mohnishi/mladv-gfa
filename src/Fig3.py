@@ -1,9 +1,10 @@
 import importlib
 import gfa
 importlib.reload(gfa)
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
 from generate_data import *
+import visualize
 
 # Create Corentin's artifical data set corresponding to Fig. 3 (original paper)
 R = 3 #rank
@@ -31,18 +32,20 @@ West3 = West[:,:30]
 
 # Visualize the group 1 of the true projection mappings
 plt.figure(1)
-for k in range(7):
-	for d in range(10):
-		plt.scatter(k+1,d+1,s=W1[k,d],color='black', marker = 's')
+visualize.plot_W(W1.T)
+#for k in range(7):
+#	for d in range(10):
+#		plt.scatter(k+1,d+1,s=W1[k,d],color='black', marker = 's')
 
 plt.title("True W")
 plt.ylabel("Group 1")
 
 # Visualize the group 1 of the estimated projection mappings
 plt.figure(2)
-for k in range(7):
-	for d in range(10):
-		plt.scatter(k+1,d+1,s=West[k,d],color='black', marker = 's')
+visualize.plot_W(West1.T)
+#for k in range(7):
+#	for d in range(10):
+#		plt.scatter(k+1,d+1,s=West[k,d],color='black', marker = 's')
 
 plt.title("Estimated W")
 plt.ylabel("Group 1")

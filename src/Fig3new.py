@@ -6,6 +6,7 @@ from genf import *
 import importlib
 import gfa
 importlib.reload(gfa)
+import visualize
 
 import matplotlib.pyplot as plt
 
@@ -40,8 +41,9 @@ X = W.T @ Z + np.random.normal(loc=0, scale=np.sqrt(1/tau), size=(sum(D), N))
 
 
 # Run GFA
-g = gfa.GFA(optimize_method="bfgs", debug=True)
+g = gfa.GFA(optimize_method="l-bfgs-b", debug=True, tol=1e-5)
 g.fit(X,D)
+print(g.alpha)
 
 # Get estimated W (West)
 West = g.get_W()
@@ -56,20 +58,22 @@ West3 = West[:,:30]
 # # Extract groups of the true projection mappings
 W1 = W[:,:10]
 
-plt.figure(1)
-for k in range(7):
-	for d in range(10):
-		plt.scatter(k+1,d+1,s=W1[k,d],color='black', marker = 's')
+plt.subplot(1, 2, 1)
+visualize.plot_W(W.T)
+#for k in range(7):
+#	for d in range(10):
+#		plt.scatter(k+1,d+1,s=W1[k,d],color='black', marker = 's')
 
 plt.title("True W - Group 1")
 plt.ylabel("K axis")
 plt.xlabel("Dm axis")
 
 
-plt.figure(2)
-for k in range(7):
-	for d in range(10):
-		plt.scatter(k+1,d+1,s=West1[k,d],color='black', marker = 's')
+plt.subplot(1, 2, 2)
+visualize.plot_W(West.T)
+#for k in range(7):
+#	for d in range(10):
+#		plt.scatter(k+1,d+1,s=West1[k,d],color='black', marker = 's')
 
 plt.title("Estimated W - Group 1")
 plt.ylabel("K axis")
