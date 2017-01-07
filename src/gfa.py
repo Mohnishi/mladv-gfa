@@ -40,7 +40,7 @@ class GFA:
 
     def __init__(self, rank=4, factors=7, max_iter=1000, lamb=0.1,
                  a_tau_prior=1e-14, b_tau_prior=1e-14,
-                 tol=1e-2, optimize_method="BFGS", debug=False):
+                 tol=1e-2, optimize_method="L-BFGS-B", debug=False):
         self.lamb = lamb
         self.rank = rank
         self.factors = factors
