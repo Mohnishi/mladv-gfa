@@ -2,20 +2,26 @@
 import numpy as np
 import random
 from genr import *
+from genf import *
+
 tau = 10
 R = 3
 K = 7
 D = np.array([10,10,10]) #groups     np.array([2,4,4])
 N = 100
 
+# create filter
+F = gen_filter(len(D))
+
 # make some columns W completely zero
 W = np.zeros((K, sum(D)))
 
 for k in range(K):
-    # keep some groups all zero
+    # keep some groups all zero according to the filter
     base = 0
     for m in range(len(D)):
-        if random.getrandbits(1):
+        #if random.getrandbits(1):
+        if F[m,k] == 1:
             W[k,base:base+D[m]] = np.random.normal(loc=0, scale=1, size=D[m])
         base += D[m]
 
