@@ -56,23 +56,24 @@ West3 = West[:,:30]
 # # Extract groups of the true projection mappings
 W1 = W[:,:10]
 
+print(W.shape)
+
 plt.figure(1)
 for k in range(7):
-	for d in range(10):
-		plt.scatter(k+1,d+1,s=W1[k,d],color='black', marker = 's')
+	for d in range(30):
+		plt.scatter(k+1,d+1,s=W[k,d],color='black', marker = 's')
 
-plt.title("True W - Group 1")
-plt.ylabel("K axis")
-plt.xlabel("Dm axis")
+plt.title("True W ")
+plt.xlabel("K axis")
+plt.ylabel("D axis")
 
 
 plt.figure(2)
 for k in range(7):
-	for d in range(10):
-		plt.scatter(k+1,d+1,s=West1[k,d],color='black', marker = 's')
+	for d in range(30):
+		plt.scatter(k+1,d+1,s=West[k,d],color='black', marker = 's')
 
-plt.title("Estimated W - Group 1")
-plt.ylabel("K axis")
-plt.xlabel("Dm axis")
-
+plt.title("Estimated W ")
+plt.xlabel("K axis")
+plt.ylabel("D axis")
 plt.show()
