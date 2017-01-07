@@ -19,7 +19,7 @@ W2 = W[:,10:20]
 W3 = W[:,20:30]
 
 # Run GFA
-g = gfa.GFA(optimize_method="bfgs", debug=True)
+g = gfa.GFA(optimize_method="l-bfgs-b", debug=True)
 g.fit(X,D)
 
 # Get estimated W (West)
@@ -31,8 +31,8 @@ West2 = West[:,10:20]
 West3 = West[:,:30]
 
 # Visualize the group 1 of the true projection mappings
-plt.figure(1)
-visualize.plot_W(W1.T)
+plt.subplot(1, 2, 1)
+visualize.plot_W(W.T)
 #for k in range(7):
 #	for d in range(10):
 #		plt.scatter(k+1,d+1,s=W1[k,d],color='black', marker = 's')
@@ -41,8 +41,8 @@ plt.title("True W")
 plt.ylabel("Group 1")
 
 # Visualize the group 1 of the estimated projection mappings
-plt.figure(2)
-visualize.plot_W(West1.T)
+plt.subplot(1, 2, 2)
+visualize.plot_W(West.T)
 #for k in range(7):
 #	for d in range(10):
 #		plt.scatter(k+1,d+1,s=West[k,d],color='black', marker = 's')

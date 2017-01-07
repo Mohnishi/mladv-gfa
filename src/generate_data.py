@@ -74,9 +74,8 @@ def generate_x(Z, W, D, Tau, N):
     offset = 0
     X = np.zeros([sum(D), N])
     for i in range(len(D)):
-        m = np.dot(Z[:,i], W[:, offset:offset + D[i]])
-        s = np.eye(D[i]) / Tau[i]
-        X[offset:offset + D[i], :] = multivariate_normal(m, s, N).T
+        m = W[:, offset:offset + D[i]].T @ Z
+        X[offset:offset + D[i], :] = m + normal(0, 1 / np.sqrt(Tau[i]), (D[i], N))
         offset = offset + D[i]
     return X
 
