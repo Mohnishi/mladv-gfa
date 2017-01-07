@@ -33,5 +33,6 @@ X = W.T @ Z + np.random.normal(loc=0, scale=np.sqrt(1/tau), size=(sum(D), N))
 
 np.save("res/w_real.npy", W)
 np.save("res/x.npy", X)
+np.save("res/d.npy", D)
 
 print_to_R(X, D, R, K)

@@ -30,8 +30,8 @@ for k in range(K):
         if F[m,k] == 1:
             W[k,base:base+D[m]] = np.random.normal(loc=0, scale=1, size=D[m])
         base += D[m]
-		
-		
+
+
 # random Z
 Z = np.random.normal(loc=0, scale=1, size=(K, N))
 
@@ -51,10 +51,10 @@ West = g.get_W()
 # Extract groups of estimated projection mappings
 West1 = West[:,:10]
 West2 = West[:,10:20]
-West3 = West[:,:30]		
-		
-		
-		
+West3 = West[:,:30]
+
+
+
 # # Extract groups of the true projection mappings
 W1 = W[:,:10]
 
