@@ -104,16 +104,13 @@ class GFA:
         # normalize rows (variables) to zero mean and unit variance
         self.X_mean = X.mean(axis=1, keepdims=True)
         self.X_std = X.std(axis=1, keepdims=True)
-        # X = (X - self.X_mean) / self.X_std
+        X = (X - self.X_mean) / self.X_std
 
         self.groups = len(D)
         split_indices = np.add.accumulate(D[:-1])
         self.X = np.split(X, split_indices)
         self.D = D
         self.N = X.shape[1]
-
-        # total variance, sum of variable variances in group
-        datavar = [sum(np.var(self.X[m], axis=1)) for m in range(self.groups)]
 
         # initialize alpha
         self.U = np.random.normal(loc=0, scale=1,
@@ -122,23 +119,15 @@ class GFA:
                                   size=(self.factors, self.rank))
         self.mu_u = np.zeros((self.groups, 1))
         self.mu_v = np.zeros((self.factors, 1))
+        self.alpha = self.get_alpha()
 
         # initialize q(tau)
         # a_tau is constant; set b_tau to a_tau so that E[tau] = 1
         self.a_tau = self.a_tau_prior + self.D * self.N / 2
         self.b_tau = self.a_tau
 
-        # initialize alpha to match data scale
-        self.alpha = self.get_alpha()
-        for m in range(self.groups):
-            self.alpha[m,:] = np.full((1, self.factors),
-                self.factors*self.D[m]/(datavar[m]-1/self.get_tau(m)))
-
-        print(self.alpha)
-
         # initialize q(Z)
         # TODO: investigate effect of initialization
-        # sig = np.random.randn(elf.factors, self.factors)
         self.sigma_Z = np.eye(self.factors)
         self.m_Z = np.random.randn(self.factors, self.N)
 
@@ -307,8 +296,7 @@ class GFA:
         Output:
         returns an OptimizeResult from scipy for debugging purposes
         """
-        x0 = np.zeros(np.prod(self.U.shape) + np.prod(self.V.shape) +
-                      np.prod(self.mu_u.shape) + np.prod(self.mu_v.shape))
+        x0 = flatten_matrices(self.U, self.V, self.mu_u, self.mu_v)
 
         res = opt.minimize(self.bound_uv, x0, jac=self.grad_uv,
                            method=self.optimize_method)
