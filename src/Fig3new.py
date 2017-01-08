@@ -75,8 +75,8 @@ visualize.plot_W(West.T)
 #	for d in range(10):
 #		plt.scatter(k+1,d+1,s=West1[k,d],color='black', marker = 's')
 
-plt.title("Estimated W - Group 1")
-plt.ylabel("K axis")
-plt.xlabel("Dm axis")
+plt.title("Estimated W ")
+plt.xlabel("K axis")
+plt.ylabel("D axis")
 
 plt.show()
