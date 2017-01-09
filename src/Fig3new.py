@@ -10,45 +10,73 @@ import visualize
 
 import matplotlib.pyplot as plt
 
-tau = 10
-R = 3
-K = 7
+# tau = 10
+# R = 3
+# K = 7
+# D = np.array([10,10,10]) #groups     np.array([2,4,4])
+# N = 100
+
+# # create filter
+# F = gen_filter(len(D))
+
+# # make some columns W completely zero
+# W = np.zeros((K, sum(D)))
+
+# for k in range(K):
+    # # keep some groups all zero according to the filter
+    # base = 0
+    # for m in range(len(D)):
+        # #if random.getrandbits(1):
+        # if F[m,k] == 1:
+            # W[k,base:base+D[m]] = np.random.normal(loc=0, scale=1, size=D[m])
+        # base += D[m]
+
+
+# # random Z
+# Z = np.random.normal(loc=0, scale=1, size=(K, N))
+
+# # X from W and Z
+# X = W.T @ Z + np.random.normal(loc=0, scale=np.sqrt(1/tau), size=(sum(D), N))
+
+
+
+# # Run GFA
+# g = gfa.GFA(optimize_method="l-bfgs-b", debug=True, tol=1e-5)
+# g.fit(X,D)
+# print(g.alpha)
+
+# # Get estimated W (West)
+# West = g.get_W()
+
+
+# Create Corentin's artifical data set corresponding to Fig. 3 (original paper)
+R = 3 #rank
+K = 7 #factors
 D = np.array([10,10,10]) #groups     np.array([2,4,4])
-N = 100
+N = 100 #samples
+X, W, Z, alpha, Tau = generation(N, K, D, R)
 
-# create filter
-F = gen_filter(len(D))
+while W.max() > 100:
+    X, W, Z, alpha, Tau = generation(N, K, D, R)
 
-# make some columns W completely zero
-W = np.zeros((K, sum(D)))
-
-for k in range(K):
-    # keep some groups all zero according to the filter
-    base = 0
-    for m in range(len(D)):
-        #if random.getrandbits(1):
-        if F[m,k] == 1:
-            W[k,base:base+D[m]] = np.random.normal(loc=0, scale=1, size=D[m])
-        base += D[m]
-
-
-# random Z
-Z = np.random.normal(loc=0, scale=1, size=(K, N))
-
-# X from W and Z
-X = W.T @ Z + np.random.normal(loc=0, scale=np.sqrt(1/tau), size=(sum(D), N))
-
-
+print("Noise variance of generated data:", 1 / Tau)
+# Extract groups of the true projection mappings
+W1 = W[:,:10]
+W2 = W[:,10:20]
+W3 = W[:,20:30]
 
 # Run GFA
-g = gfa.GFA(optimize_method="l-bfgs-b", debug=True, tol=1e-5)
+g = gfa.GFA(optimize_method="l-bfgs-b", debug=True, max_iter=10000)
 g.fit(X,D)
-print(g.alpha)
 
 # Get estimated W (West)
 West = g.get_W()
 
-print(West.shape)
+
+
+
+
+
 
 # Extract groups of estimated projection mappings
 West1 = West[:,:10]
@@ -112,6 +140,3 @@ plt.show()
 
 
 
-
-
-#Wsort =
