@@ -48,6 +48,8 @@ print(g.alpha)
 # Get estimated W (West)
 West = g.get_W()
 
+print(West.shape)
+
 # Extract groups of estimated projection mappings
 West1 = West[:,:10]
 West2 = West[:,10:20]
@@ -58,6 +60,7 @@ West3 = West[:,:30]
 # # Extract groups of the true projection mappings
 W1 = W[:,:10]
 
+plt.figure(1)
 plt.subplot(1, 2, 1)
 visualize.plot_W(W.T)
 #for k in range(7):
@@ -79,4 +82,36 @@ plt.title("Estimated W ")
 plt.xlabel("K axis")
 plt.ylabel("D axis")
 
+
+plt.figure(2)
+plt.subplot(1, 2, 1)
+visualize.plot_W(W.T)
+#for k in range(7):
+#	for d in range(10):
+#		plt.scatter(k+1,d+1,s=W1[k,d],color='black', marker = 's')
+
+plt.title("True W ")
+plt.xlabel("K axis")
+plt.ylabel("D axis")
+
+
+plt.subplot(1, 2, 2)
+visualize.plot_W(visualize.sort_W(W, West).T)
+#for k in range(7):
+#	for d in range(10):
+#		plt.scatter(k+1,d+1,s=West1[k,d],color='black', marker = 's')
+
+
+
+plt.title("Estimated W after sort")
+plt.xlabel("K axis")
+plt.ylabel("D axis")
+
 plt.show()
+
+
+
+
+
+
+#Wsort = 
