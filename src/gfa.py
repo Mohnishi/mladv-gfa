@@ -40,14 +40,18 @@ class GFA:
 
     def __init__(self, rank=4, factors=7, max_iter=1000, lamb=0.1,
                  a_tau_prior=1e-14, b_tau_prior=1e-14,
-                 tol=1e-2, optimize_method="L-BFGS-B", debug=False):
+                 tol=1e-2, init_tau=1e3, optimize_method="L-BFGS-B",
+                 opt_iter=10**5, ftol=10**10, debug=False):
         self.lamb = lamb
         self.rank = rank
         self.factors = factors
         self.a_tau_prior = a_tau_prior
         self.b_tau_prior = b_tau_prior
+        self.init_tau = init_tau
 
         self.optimize_method = optimize_method
+        self.opt_iter = opt_iter
+        self.opt_ftol = ftol
         self.tol = tol
         self.max_iter = max_iter
         self.debug = debug
@@ -128,6 +132,8 @@ class GFA:
         self.sigma_Z = np.eye(self.factors)
         self.m_Z = np.random.randn(self.factors, self.N)
 
+        # return a initial value for tau
+        self.first_update = True
 
     def get_W(self):
         return np.hstack([self.E_W(m) for m in range(self.groups)])
@@ -180,7 +186,10 @@ class GFA:
     # NOTE: all expectations with regard to q
     def E_tau(self, m):
         """Calculate E[tau(m)]"""
-        return self.a_tau[m] / self.b_tau[m]
+        if self.first_update:
+            return self.init_tau
+        else:
+            return self.a_tau[m] / self.b_tau[m]
 
     def E_logtau(self, m):
         """Calculate E[log tau(m)]"""
@@ -302,8 +311,14 @@ class GFA:
         """
         x0 = flatten_matrices(self.U, self.V, self.mu_u, self.mu_v)
 
-        res = opt.minimize(self.bound_uv, x0, jac=self.grad_uv,
-                           method=self.optimize_method)
+        if self.opt_iter == "L-BFGS-B":
+            res = opt.minimize(self.bound_uv, x0, jac=self.grad_uv,
+                               method=self.optimize_method, maxiter=self.opt_iter,
+                               options={"ftol":self.opt_ftol, "maxiter":self.opt_iter})
+        else:
+            res = opt.minimize(self.bound_uv, x0, jac=self.grad_uv,
+                               method=self.optimize_method,
+                               options={"maxiter":self.opt_iter})
         if not res.success and self.debug:
             raise Exception("optimzation failure")
 
@@ -315,3 +330,4 @@ class GFA:
     def update_tau(self):
         self.b_tau = [self.b_tau_prior + 1/2 * self.E_X_WZ(m)
                       for m in range(self.groups)]
+        self.first_update = False

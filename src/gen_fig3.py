@@ -22,7 +22,7 @@ for k in range(K):
     for m in range(len(D)):
         #if random.getrandbits(1):
         if F[m,k] == 1:
-            W[k,base:base+D[m]] = np.random.normal(loc=0, scale=1, size=D[m])
+            W[k,base:base+D[m]] = np.random.normal(loc=0, scale=5, size=D[m])
         base += D[m]
 
 # random Z

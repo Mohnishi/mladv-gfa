@@ -17,14 +17,14 @@ if __name__ == '__main__':
     plt.ylabel("D")
 
     plt.subplot(1,3,2)
-    visualize.plot_W(W_ref.T)
+    visualize.plot_W(visualize.sort_W(W_real, W_ref).T)
 
     plt.title("Ref W")
     plt.xlabel("K")
     plt.ylabel("D")
 
     plt.subplot(1,3,3)
-    visualize.plot_W(W_our.T)
+    visualize.plot_W(visualize.sort_W(W_real, W_our).T)
 
     plt.title("Our W")
     plt.xlabel("K")
