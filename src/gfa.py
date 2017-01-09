@@ -41,7 +41,7 @@ class GFA:
     def __init__(self, rank=4, factors=7, max_iter=1000, lamb=0.1,
                  a_tau_prior=1e-14, b_tau_prior=1e-14,
                  tol=1e-2, init_tau=1e3, optimize_method="L-BFGS-B",
-                 opt_iter=10**5, ftol=10**10, debug=False):
+                 opt_iter=10**5, factr=1e10, debug=False):
         self.lamb = lamb
         self.rank = rank
         self.factors = factors
@@ -51,7 +51,7 @@ class GFA:
 
         self.optimize_method = optimize_method
         self.opt_iter = opt_iter
-        self.opt_ftol = ftol
+        self.factr = factr
         self.tol = tol
         self.max_iter = max_iter
         self.debug = debug
@@ -312,9 +312,10 @@ class GFA:
         x0 = flatten_matrices(self.U, self.V, self.mu_u, self.mu_v)
 
         if self.opt_iter == "L-BFGS-B":
+            ftol = self.factr * np.finfo(float).eps
             res = opt.minimize(self.bound_uv, x0, jac=self.grad_uv,
                                method=self.optimize_method, maxiter=self.opt_iter,
-                               options={"ftol":self.opt_ftol, "maxiter":self.opt_iter})
+                               options={"ftol":ftol, "maxiter":self.opt_iter})
         else:
             res = opt.minimize(self.bound_uv, x0, jac=self.grad_uv,
                                method=self.optimize_method,

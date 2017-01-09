@@ -1,38 +1,44 @@
-# generate figure 3 similar to one found in the paper
 import numpy as np
 import random
+import sys
 from genr import *
 from genf import *
 
-tau = 10
-R = 3
-K = 7
-D = np.array([10,10,10]) #groups     np.array([2,4,4])
-N = 100
+if __name__ == '__main__':
+    # generate figure 3 similar to one found in the paper
+    full=False
+    if len(sys.argv) > 1:
+        full=True
 
-# create filter
-F = gen_filter(len(D))
+    tau = 10
+    R = 3
+    K = 7
+    D = np.array([10,10,10]) #groups     np.array([2,4,4])
+    N = 100
 
-# make some columns W completely zero
-W = np.zeros((K, sum(D)))
+    # create filter
+    F = gen_filter(len(D))
 
-for k in range(K):
-    # keep some groups all zero according to the filter
-    base = 0
-    for m in range(len(D)):
-        #if random.getrandbits(1):
-        if F[m,k] == 1:
-            W[k,base:base+D[m]] = np.random.normal(loc=0, scale=5, size=D[m])
-        base += D[m]
+    # make some columns W completely zero
+    W = np.zeros((K, sum(D)))
 
-# random Z
-Z = np.random.normal(loc=0, scale=1, size=(K, N))
+    for k in range(K):
+        # keep some groups all zero according to the filter
+        base = 0
+        for m in range(len(D)):
+            #if random.getrandbits(1):
+            if F[m,k] == 1:
+                W[k,base:base+D[m]] = np.random.normal(loc=0, scale=3, size=D[m])
+            base += D[m]
 
-# X from W and Z
-X = W.T @ Z + np.random.normal(loc=0, scale=np.sqrt(1/tau), size=(sum(D), N))
+    # random Z
+    Z = np.random.normal(loc=0, scale=1, size=(K, N))
 
-np.save("res/w_real.npy", W)
-np.save("res/x.npy", X)
-np.save("res/d.npy", D)
+    # X from W and Z
+    X = W.T @ Z + np.random.normal(loc=0, scale=np.sqrt(1/tau), size=(sum(D), N))
 
-print_to_R(X, D, R, K)
+    np.save("res/w_real.npy", W)
+    np.save("res/x.npy", X)
+    np.save("res/d.npy", D)
+
+    print_to_R(X, D, R, K, full=full)

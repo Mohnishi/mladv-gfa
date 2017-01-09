@@ -138,9 +138,9 @@ GFA <- function(Y,K,opts) {
   #     print("The rank corresponds to full rank solution ()")
   #   R <- "full"
   # }
-  if (R == "full") {
-      stop("Please test using specified rank")
-  }
+  # if (R == "full") {
+  #     stop("Please test using specified rank")
+  # }
   if(R != "full") {
     if(opts$verbose==2)
       print("NOTE: Optimization of the rotation is not supported for low rank model.")

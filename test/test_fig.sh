@@ -8,7 +8,8 @@ cd "${0%/*}" # change to script location
 cd ../src
 mkdir -p res
 echo "Generation data..."
-python gen_fig3.py > ../ref/data.r
+# add/remove argument 'full' to use/not use optimization in reference
+python gen_fig3.py full > ../ref/data.r
 cd ../ref
 start=`date +%s`
 echo "Running reference GFA..."
