@@ -146,16 +146,13 @@ class GFA:
            (may ignore constants with respect to parameters)"""
 
         # calculate E[log p(X, Theta)]
-        p_X = sum((self.N * self.D[m]/2 * self.E_logtau(m) - self.E_tau(m)/2 * (
-                np.trace(self.X[m] @ self.X[m].T) -
-                2 * np.trace(self.E_W(m).T @ self.E_Z() @ self.X[m].T) +
-                np.trace(self.E_WW(m) @ self.E_ZZ()))
+        p_X = sum((self.N * self.D[m]/2 * self.E_logtau(m) - self.E_tau(m)/2 * self.E_X_WZ(m)
             for m in range(self.groups)))
 
         p_Z = -1/2 * np.trace(self.E_ZZ())
 
-        p_tau = sum(((self.a_tau[m] - 1) * self.E_logtau(m)
-                - self.b_tau[m]*self.E_tau(m))
+        p_tau = sum(((self.a_tau_prior - 1) * self.E_logtau(m)
+                - self.b_tau_prior * self.E_tau(m))
             for m in range(self.groups))
 
         p_W = (1/2 * (self.D @ np.sum(np.log(self.alpha), axis=1)
@@ -196,11 +193,14 @@ class GFA:
         """Calculate E[W(m)]"""
         return self.m_W[m]
 
+    def Cov_W(self, m):
+        return self.D[m] * self.sigma_W[m]
+
     def E_WW(self, m):
         """Calculate E[W(m) W(m).T]
         Size = K x K
         """
-        return self.D[m] * self.sigma_W[m] + self.m_W[m] @ self.m_W[m].T
+        return self.Cov_W(m) + self.m_W[m] @ self.m_W[m].T
 
     def E_WW_diag(self):
         """Calculate diagonal of E_WW for all groups
@@ -212,9 +212,18 @@ class GFA:
         """Calculate E[Z]"""
         return self.m_Z
 
+    def Cov_Z(self):
+        return self.N * self.sigma_Z
+
     def E_ZZ(self):
         """Calculate E[Z Z.T]"""
-        return self.N * self.sigma_Z + self.m_Z @ self.m_Z.T
+        return self.Cov_Z() + self.m_Z @ self.m_Z.T
+
+    def E_X_WZ(self, m):
+        """Calculate sum_i E[(x(m)_i - W(m).T z_i)^2]"""
+        return (trprod(self.E_WW(m), self.Cov_Z()) +
+                trprod(self.Cov_W(m), self.E_Z() @ self.E_Z().T) +
+                ((self.E_W(m).T @ self.E_Z() - self.X[m])**2).sum())
 
     # TODO: document simplification of formulas
     def update_W(self):
@@ -307,8 +316,5 @@ class GFA:
         return res
 
     def update_tau(self):
-        self.b_tau = [self.b_tau_prior +
-                      1/2 * (np.trace(self.X[m] @ self.X[m].T) +
-                             np.trace(- 2*self.E_W(m) @ self.X[m] @ self.E_Z().T +
-                                      self.E_WW(m) @ self.E_ZZ()))
+        self.b_tau = [self.b_tau_prior + 1/2 * self.E_X_WZ(m)
                       for m in range(self.groups)]
