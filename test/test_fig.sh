@@ -16,7 +16,7 @@ echo "Converting reference output..."
 python fig3_data.py
 echo "Running our GFA..."
 # change argument to use more/less iterations
-python infer.py 10
+python infer.py 1
 echo "Plotting results..."
 python plot_res.py
 

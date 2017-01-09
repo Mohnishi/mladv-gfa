@@ -28,3 +28,6 @@ cat("import numpy as np\n\n")
 cat("W_flat = np.array([", paste(c(W), collapse=",", sep=""), "])\n", sep="")
 cat("W = W_flat.reshape((", ncol(W), ",", nrow(W), "))\n", sep = "")
 cat("np.save('res/w_ref.npy', W)\n")
+
+cat("bounds = np.array([", paste(res$cost,  collapse=",", sep=""), "])\n", sep="")
+cat("np.save('res/bounds_ref.npy', bounds)\n")
