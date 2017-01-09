@@ -113,12 +113,12 @@ GFA <- function(Y,K,opts) {
   #
 
   # Check that data is centered
-  if(!all(unlist(lapply(Y,colMeans)) < 1e-7) & opts$verbose == 2) {
-    print("Warning: The data does not have zero mean.")
+  if(!all(unlist(lapply(Y,colMeans)) < 1e-7)) {
+    stop("Warning: The data does not have zero mean.")
   }
   # Check the number of views
-  if(length(Y)==1 & opts$verbose == 2){
-    print("Warning: The number of data sets must be larger than 1.")
+  if(length(Y)==1){
+    stop("Warning: The number of data sets must be larger than 1.")
   }
 
   #
@@ -133,10 +133,13 @@ GFA <- function(Y,K,opts) {
     datavar[m]=sum(apply(Y[[m]],2,var)) #     and for GFAtrim()
 
   R <- opts$R                 # Model rank R: either "full" or an integer from 0 to min(M,K)
-  if(R >= min(c(M,K)) && is.double(R)) {  # if R >= min(M,K) convert to full
-    if(opts$verbose==2)
-      print("The rank corresponds to full rank solution.")
-    R <- "full"
+  # if(R >= min(c(M,K)) && is.double(R)) {  # if R >= min(M,K) convert to full
+  #   if(opts$verbose==2)
+  #     print("The rank corresponds to full rank solution ()")
+  #   R <- "full"
+  # }
+  if (R == "full") {
+      stop("Please test using specified rank")
   }
   if(R != "full") {
     if(opts$verbose==2)

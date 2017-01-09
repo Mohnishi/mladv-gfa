@@ -67,30 +67,28 @@ class GFA:
 
         self.init(X,D)
         self.update_params()
-        prev_bound = self.bound()
 
-        for i in range(1, self.max_iter + 1):
+        self.cost = [self.bound()]
+        for i in range(self.max_iter):
             self.update_params()
-            new_bound = self.bound()
+            self.cost.append(self.bound())
 
-            if np.abs(new_bound - prev_bound) < self.tol:
-                prev_bound = new_bound
+            if np.abs(self.cost[i] - self.cost[i-1]) < self.tol:
                 if self.debug:
                     print("Successful fit")
                 break
 
-            prev_bound = new_bound
-
-            if (i == 1 or i % 10 == 0) and self.debug:
-                print("Lower bound at iteration {}: {}".format(i, prev_bound))
+            if (i == 0 or (i+1) % 10 == 0) and self.debug:
+                print("Lower bound at iteration {}: {}".format(i+1, self.cost[i]))
         else: # nobreak
             print("Reach the maximum number of iterations")
 
         if self.debug:
-            print("Took {} iterations".format(i))
-            print("Maximal lower bound: {}".format(prev_bound))
-        # for debugging calling code
-        self.iters = 10
+            print("Took {} iterations".format(i+1))
+            print("Maximal lower bound: {}".format(self.cost[i]))
+
+    def get_bounds(self):
+        return self.cost
 
     def update_params(self):
         self.update_W()

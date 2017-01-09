@@ -10,3 +10,4 @@ if __name__ == '__main__':
 
     g = gfa.GFA_rep(X,D, n=n, debug_iter=True, debug=False, tol=1e-5, max_iter=10000)
     np.save("res/w_our.npy", g.get_W())
+    np.save("res/bounds_our.npy", g.get_bounds())
