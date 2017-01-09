@@ -63,7 +63,7 @@ def generate_tau(D):
     """
     p = 1   # Should be 14 but problem with sampling if 14 is used
     shape = pow(10,-p)
-    rate = pow(10,-p)
+    rate = pow(10,-p) / 100
     return gamma(shape, 1/rate, len(D))
 
 
@@ -100,4 +100,4 @@ def generation(N, K, D, R):
     Tau = generate_tau(D)
     Z = generate_z(K,N)
     X = generate_x(Z, W, D, Tau, N)
-    return X, W, Z
+    return X, W, Z, alpha, Tau

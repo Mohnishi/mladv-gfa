@@ -11,15 +11,19 @@ R = 3 #rank
 K = 7 #factors
 D = np.array([10,10,10]) #groups     np.array([2,4,4])
 N = 100 #samples
-X, W, Z = generation(N, K, D, R)
+X, W, Z, alpha, Tau = generation(N, K, D, R)
 
+while W.max() > 100:
+    X, W, Z, alpha, Tau = generation(N, K, D, R)
+
+print("Noise variance of generated data:", 1 / Tau)
 # Extract groups of the true projection mappings
 W1 = W[:,:10]
 W2 = W[:,10:20]
 W3 = W[:,20:30]
 
 # Run GFA
-g = gfa.GFA(optimize_method="l-bfgs-b", debug=True)
+g = gfa.GFA(optimize_method="l-bfgs-b", debug=True, max_iter=10000)
 g.fit(X,D)
 
 # Get estimated W (West)
