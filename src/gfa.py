@@ -148,16 +148,13 @@ class GFA:
            (may ignore constants with respect to parameters)"""
 
         # calculate E[log p(X, Theta)]
-        p_X = sum((self.N * self.D[m]/2 * self.E_logtau(m) - self.E_tau(m)/2 * (
-                np.trace(self.X[m] @ self.X[m].T) -
-                2 * np.trace(self.E_W(m).T @ self.E_Z() @ self.X[m].T) +
-                np.trace(self.E_WW(m) @ self.E_ZZ()))
+        p_X = sum((self.N * self.D[m]/2 * self.E_logtau(m) - self.E_tau(m)/2 * self.E_X_WZ(m)
             for m in range(self.groups)))
 
         p_Z = -1/2 * np.trace(self.E_ZZ())
 
-        p_tau = sum(((self.a_tau[m] - 1) * self.E_logtau(m)
-                - self.b_tau[m]*self.E_tau(m))
+        p_tau = sum(((self.a_tau_prior - 1) * self.E_logtau(m)
+                - self.b_tau_prior * self.E_tau(m))
             for m in range(self.groups))
 
         p_W = (1/2 * (self.D @ np.sum(np.log(self.alpha), axis=1)
