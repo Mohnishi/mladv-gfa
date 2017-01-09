@@ -101,16 +101,13 @@ class GFA:
     def init(self, X, D):
         assert D.sum() == X.shape[0]
 
-        # normalize rows (variables) to zero mean and unit variance
-        self.X_mean = X.mean(axis=1, keepdims=True)
-        self.X_std = X.std(axis=1, keepdims=True)
-        X = (X - self.X_mean) / self.X_std
-
         self.groups = len(D)
         split_indices = np.add.accumulate(D[:-1])
         self.X = np.split(X, split_indices)
         self.D = D
         self.N = X.shape[1]
+
+        datavar = [self.X[m].var() for m in range(self.groups)]
 
         # initialize alpha
         self.U = np.random.normal(loc=0, scale=1,
@@ -120,6 +117,8 @@ class GFA:
         self.mu_u = np.zeros((self.groups, 1))
         self.mu_v = np.zeros((self.factors, 1))
         self.alpha = self.get_alpha()
+        for m in range(self.groups):
+            self.alpha[m,:] = self.factors / datavar[m]
 
         # initialize q(tau)
         # a_tau is constant; set b_tau to a_tau so that E[tau] = 1
@@ -133,9 +132,7 @@ class GFA:
 
 
     def get_W(self):
-        W = np.hstack([self.E_W(m) for m in range(self.groups)])
-        # scale W using saved std
-        return W * self.X_std.T
+        return np.hstack([self.E_W(m) for m in range(self.groups)])
 
     def get_Z(self):
         return self.E_Z()
