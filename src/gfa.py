@@ -104,6 +104,7 @@ class GFA:
         assert D.sum() == X.shape[0]
 
         self.groups = len(D)
+        self.variables = X.shape[0]
         split_indices = np.add.accumulate(D[:-1])
         self.X = np.split(X, split_indices)
         self.D = D
@@ -149,36 +150,41 @@ class GFA:
            (may ignore constants with respect to parameters)"""
 
         # calculate E[log p(X, Theta)]
-        p_X = sum((self.N * self.D[m]/2 * self.E_logtau(m) - self.E_tau(m)/2 * self.E_X_WZ(m)
-            for m in range(self.groups)))
+        p_X = sum(self.N * self.D[m]/2 * (self.E_logtau(m) - np.log(2*np.pi))
+                  - self.E_tau(m)/2 * self.E_X_WZ(m)
+                  for m in range(self.groups))
 
-        p_Z = -1/2 * np.trace(self.E_ZZ())
+        p_Z = -self.N*self.factors/2 * np.log(2*np.pi) - 1/2 * np.trace(self.E_ZZ())
 
-        p_tau = sum(((self.a_tau_prior - 1) * self.E_logtau(m)
-                - self.b_tau_prior * self.E_tau(m))
-            for m in range(self.groups))
+        p_tau = sum(self.a_tau_prior * np.log(self.b_tau_prior)
+                    - scipy.special.gammaln(self.a_tau_prior)
+                    + (self.a_tau_prior - 1) * self.E_logtau(m)
+                    - self.b_tau_prior * self.E_tau(m)
+                    for m in range(self.groups))
 
-        p_W = (1/2 * (self.D @ np.sum(np.log(self.alpha), axis=1)
-                - np.trace(self.alpha.T @ self.E_WW_diag())))
+        p_W = 1/2 * (self.D @ np.sum(np.log(self.alpha), axis=1)
+                     - self.factors*self.variables*np.log(2*np.pi)
+                     - trprod(self.alpha.T, self.E_WW_diag()))
 
-        p_U = -self.lamb/2 * np.sum(self.U**2)
-        p_V = -self.lamb/2 * np.sum(self.V**2)
+        p_U = (self.groups*self.rank/2 * (np.log(self.lamb) - np.log(2*np.pi))
+               - self.lamb/2 * np.sum(self.U**2))
+        p_V = (self.factors*self.rank/2 * (np.log(self.lamb) - np.log(2*np.pi))
+               - self.lamb/2 * np.sum(self.V**2))
 
         p = p_X + p_Z + p_tau + p_W + p_U + p_V
 
         # calculate E[-log q(Theta)] (entropy)
-        ent_Z = (self.N/2 * np.log((2*np.pi*np.exp(1))**self.factors *
-            np.linalg.det(self.sigma_Z)))
+        ent_Z = self.N/2 * np.log((2*np.pi*np.e)**self.factors
+                                  * np.linalg.det(self.sigma_Z))
 
+        ent_tau = sum(self.a_tau[m] - np.log(self.b_tau[m])
+                      + scipy.special.gammaln(self.a_tau[m])
+                      + (1 - self.a_tau[m]) * scipy.special.digamma(self.a_tau[m])
+                      for m in range(self.groups))
 
-        ent_tau = sum((self.a_tau[m] - np.log(self.b_tau[m]) +
-                scipy.special.gammaln(self.a_tau[m]) +
-                (1 - self.a_tau[m])*scipy.special.digamma(self.a_tau[m])
-            for m in range(self.groups)))
-
-        ent_W = sum((self.D[m]/2 * np.log( (2*np.pi*np.exp(1))**self.factors *
-                np.linalg.det(self.sigma_W[m]))
-            for m in range(self.groups)))
+        ent_W = sum(self.D[m]/2 * np.log((2*np.pi*np.e)**self.factors
+                                          * np.linalg.det(self.sigma_W[m]))
+                    for m in range(self.groups))
 
         ent = ent_Z + ent_tau + ent_W
         return p + ent
