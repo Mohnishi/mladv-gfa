@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools
+from scipy.spatial.distance import cosine
+import math
 
 def plot_W(W):
     row_indices, column_indices = np.indices(W.shape)
@@ -27,36 +29,22 @@ def sort_W_old(W_real, W_est):
     
 def sort_W(W_real, W_est):   
     K = W_real.shape[0]
-    f = np.sqrt(np.sum(W_est ** 2, axis = 1)) == 0
-    P = K - np.sum(f)
-    sim = np.zeros([P,K])
+    sim = np.zeros([K,K])
     
-    # Matrix of similarity
-    W_tmp = W_est[np.sum(W_est, axis=1) != 0]    
-    for i in range(P):
+    # Matrix of similarity 
+    for i in range(K):
         for j in range(K):
-            sim[i,j] = np.dot(np.abs(W_tmp[i,:]), np.abs(W_real[j,:])) / (np.linalg.norm(W_tmp[i,:]) * np.linalg.norm(W_real[j,:]))
-    
+            sim[i,j] = 1 - cosine(np.abs(W_est[i,:]), np.abs(W_real[j,:]))
+            if math.isnan(sim[i,j]):
+                sim[i,j] = 0
     # Compute the similairty for every permutation
     maxi_score = -np.inf
-    for permu_all in itertools.permutations(range(K)):
-        permu = permu_all[0:P]
+    for permu in itertools.permutations(range(K)):
         score = 0
-        for i in range(P):
-            score += sim[i, permu[i]]
+        for i in range(K):
+            score += sim[permu[i], i]
         if score > maxi_score:
             maxi_score = score
-            maxi_permu = permu_all
-    # 
-    final_permu = np.asarray(maxi_permu)
-    offset_zero = 0
-    offset = 0
-    for i in range(len(final_permu)):
-        if f[i]:
-            final_permu[i] = maxi_permu[offset_zero + P]
-            offset_zero += 1
-        else:
-            final_permu[i] = maxi_permu[offset]
-            offset += 1
-    return W_est[np.argsort(final_permu), :]
+            maxi_permu = permu
+    return W_est[maxi_permu, :]
     
