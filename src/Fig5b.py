@@ -54,8 +54,8 @@ for d in range(len(data)):
 	
 	
 plt.legend((plt2,plt6,plt10),('Data rank 2','Data rank 6', 'Data rank 10'))	
-plt.xlabel(Model rank)
-plt.ylabel(Lower bound)		
+plt.xlabel('Model rank')
+plt.ylabel('Lower bound')		
 
 plt.show()
 	
