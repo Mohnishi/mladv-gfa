@@ -39,7 +39,8 @@ visualize.plot_W(W.T)
 #		plt.scatter(k+1,d+1,s=W1[k,d],color='black', marker = 's')
 
 plt.title("True W")
-plt.ylabel("Group 1")
+plt.xlabel("K")
+plt.ylabel("D")
 
 # Visualize the group 1 of the estimated projection mappings
 plt.subplot(1, 2, 2)
@@ -49,6 +50,8 @@ visualize.plot_W(visualize.sort_W(W, West).T)
 #		plt.scatter(k+1,d+1,s=West[k,d],color='black', marker = 's')
 
 plt.title("Estimated W")
-plt.ylabel("Group 1")
+plt.xlabel("K")
+plt.ylabel("D")
+
 
 plt.show()
