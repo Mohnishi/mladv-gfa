@@ -27,7 +27,7 @@ def sort_W_old(W_real, W_est):
     
 def sort_W(W_real, W_est):   
     K = W_real.shape[0]
-    f = np.sum(W_est ** 2, axis = 1) == 0
+    f = np.sqrt(np.sum(W_est ** 2, axis = 1)) == 0
     P = K - np.sum(f)
     sim = np.zeros([P,K])
     
