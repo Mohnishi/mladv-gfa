@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import itertools
 
 def plot_W(W):
     row_indices, column_indices = np.indices(W.shape)
@@ -36,11 +37,9 @@ def sort_W(W_real, W_est):
         for j in range(K):
             sim[i,j] = np.dot(np.abs(W_tmp[i,:]), np.abs(W_real[j,:])) / (np.linalg.norm(W_tmp[i,:]) * np.linalg.norm(W_real[j,:]))
     
-    # Compute the similairty for every permutation 
-    a = list(iter.permutations(range(K)))
-    maxi_score = 0
-    maxi_permu = a[0]
-    for permu_all in a:
+    # Compute the similairty for every permutation
+    maxi_score = -np.inf
+    for permu_all in itertools.permutations(range(K)):
         permu = permu_all[0:P]
         score = 0
         for i in range(P):
