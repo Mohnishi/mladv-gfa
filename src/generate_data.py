@@ -42,7 +42,7 @@ def get_alpha(U, V):
     alpha = np.exp(A)
     return A, alpha
 
-def get_w(D, alpha):
+def get_w(D, alpha, constrain_W=np.inf):
     """ Sampling W from Gaussian(0, 1/alpha)
     Size W = K x D
     """
@@ -53,6 +53,9 @@ def get_w(D, alpha):
             m = np.zeros(D[dm])
             s = np.eye(D[dm]) / alpha[dm,k]
             W[k, offset:offset+D[dm]] = multivariate_normal(m, s)
+            max_val = abs(W[k,offset:offset+D[dm]]).max()
+            if max_val > constrain_W:
+                W[k,offset:offset+D[dm]] /= max_val / constrain_W
         offset += D[dm]
     return W
 
@@ -86,7 +89,7 @@ def generate_z(K, N):
     """
     return multivariate_normal(np.zeros(K), np.eye(K), N).T
 
-def generation(N, K, D, R):
+def generation(N, K, D, R, constrain_W=np.inf, fixed_tau=0.1):
     """ Complete generation of the data
     Output :
     Size X = D x N
@@ -96,9 +99,11 @@ def generation(N, K, D, R):
     M = len(D)
     U, V = generate_UV(M, K, R)
     A, alpha = get_alpha(U, V)
-    W = get_w(D, alpha)
-    #Tau = generate_tau(D)
-    Tau = np.array([0.1] * M)
+    W = get_w(D, alpha, constrain_W=constrain_W)
+    if fixed_tau:
+        Tau = np.array([fixed_tau] * M)
+    else:
+        Tau = generate_tau(D)
     Z = generate_z(K,N)
     X = generate_x(Z, W, D, Tau, N)
     return X, W, Z, alpha, Tau

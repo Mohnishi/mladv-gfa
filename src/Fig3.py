@@ -11,10 +11,7 @@ R = 3 #rank
 K = 7 #factors
 D = np.array([10,10,10]) #groups     np.array([2,4,4])
 N = 100 #samples
-X, W, Z, alpha, Tau = generation(N, K, D, R)
-
-while W.max() > 100:
-    X, W, Z, alpha, Tau = generation(N, K, D, R)
+X, W, Z, alpha, Tau = generation(N, K, D, R, constrain_W=10)
 
 print("Noise variance of generated data:", 1 / Tau)
 # Extract groups of the true projection mappings
