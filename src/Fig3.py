@@ -46,7 +46,7 @@ plt.ylabel("Group 1")
 
 # Visualize the group 1 of the estimated projection mappings
 plt.subplot(1, 2, 2)
-visualize.plot_W(West.T)
+visualize.plot_W(visualize.sort_W(W, West).T)
 #for k in range(7):
 #	for d in range(10):
 #		plt.scatter(k+1,d+1,s=West[k,d],color='black', marker = 's')

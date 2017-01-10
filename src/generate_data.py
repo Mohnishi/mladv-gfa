@@ -97,7 +97,8 @@ def generation(N, K, D, R):
     U, V = generate_UV(M, K, R)
     A, alpha = get_alpha(U, V)
     W = get_w(D, alpha)
-    Tau = generate_tau(D)
+    #Tau = generate_tau(D)
+    Tau = np.array([0.1] * M)
     Z = generate_z(K,N)
     X = generate_x(Z, W, D, Tau, N)
     return X, W, Z, alpha, Tau
