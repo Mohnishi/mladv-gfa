@@ -1,13 +1,12 @@
 import numpy as np
 import visualize
 import matplotlib.pyplot as plt
-from scipy.stats import threshold
 
 filetype = "eps"
 dpi = 1000
 target = "plots/"
 dims = (2, 6)
-cutoff = 1e-3
+factor = 5000
 
 if __name__ == '__main__':
     # plot with threshold for clarity
@@ -27,7 +26,8 @@ if __name__ == '__main__':
 
     plt.figure(figsize=dims)
 
-    visualize.plot_W(threshold(visualize.sort_W(W_real, W_our), threshmin=cutoff).T)
+    cutoff = np.amin(np.abs(W_our)) * factor
+    visualize.plot_W(visualize.sort_W(W_real, W_our).T, threshmin=cutoff)
 
     plt.gca().axes.get_xaxis().set_visible(False)
     plt.gca().axes.get_yaxis().set_visible(False)
@@ -35,7 +35,8 @@ if __name__ == '__main__':
     plt.savefig(target+"our.eps", format=filetype, dpi=dpi)
 
     plt.figure(figsize=dims)
-    visualize.plot_W(threshold(visualize.sort_W(W_real, W_ref), threshmin=cutoff).T)
+    cutoff = np.amin(np.abs(W_ref)) * factor
+    visualize.plot_W(visualize.sort_W(W_real, W_ref).T, threshmin=cutoff)
 
     plt.gca().axes.get_xaxis().set_visible(False)
     plt.gca().axes.get_yaxis().set_visible(False)
@@ -43,7 +44,8 @@ if __name__ == '__main__':
     plt.savefig(target+"ref.eps", format=filetype, dpi=dpi)
 
     plt.figure(figsize=dims)
-    visualize.plot_W(threshold(visualize.sort_W(W_real, W_full), threshmin=cutoff).T)
+    cutoff = np.amin(np.abs(W_full)) * factor
+    visualize.plot_W(visualize.sort_W(W_real, W_full).T, threshmin=cutoff)
 
     plt.gca().axes.get_xaxis().set_visible(False)
     plt.gca().axes.get_yaxis().set_visible(False)

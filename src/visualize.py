@@ -2,13 +2,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import itertools
 from scipy.spatial.distance import cosine
+from scipy.stats import threshold
 import math
 
-def plot_W(W):
-    row_indices, column_indices = np.indices(W.shape)
+def plot_W(W, threshmin=None, threshmax=None):
+    W_filtered = threshold(np.abs(W), threshmin=threshmin, threshmax=threshmax)
+    row_indices, column_indices = np.indices(W_filtered.shape)
     plt.scatter(column_indices.flatten(), row_indices.flatten(),
-                s=abs(W).flatten(), color='black', marker='s')
-
+                s=W_filtered.flatten(), color='black', marker='s')
 
 def sort_W_old(W_real, W_est):
     K = W_real.shape[0]
