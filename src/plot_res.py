@@ -1,68 +1,79 @@
 import numpy as np
 import visualize
 import matplotlib.pyplot as plt
+from scipy.stats import threshold
+
+filetype = "eps"
+dpi = 1000
+target = "plots/"
+dims = (2, 6)
+cutoff = 1e-3
 
 if __name__ == '__main__':
+    # plot with threshold for clarity
     W_real = np.load("res/w_real.npy")
-    W_ref = np.load("res/w_ref.npy")
     W_our = np.load("res/w_our.npy")
+    W_ref = np.load("res/w_ref.npy")
+    W_full = np.load("res/w_ref_full.npy")
 
-    plt.figure()
+    plt.figure(figsize=dims)
 
-    plt.subplot(1,3,1)
     visualize.plot_W(W_real.T)
 
-    plt.title("True W")
-    plt.xlabel("K")
-    plt.ylabel("D")
+    plt.gca().axes.get_xaxis().set_visible(False)
+    plt.gca().axes.get_yaxis().set_visible(False)
 
-    plt.subplot(1,3,2)
-    visualize.plot_W(visualize.sort_W(W_real, W_ref).T)
+    plt.savefig(target+"true.eps", format=filetype, dpi=dpi)
 
-    plt.title("Ref W")
-    plt.xlabel("K")
-    plt.ylabel("D")
+    plt.figure(figsize=dims)
 
-    plt.subplot(1,3,3)
-    visualize.plot_W(visualize.sort_W(W_real, W_our).T)
+    visualize.plot_W(threshold(visualize.sort_W(W_real, W_our), threshmin=cutoff).T)
 
-    plt.title("Our W")
-    plt.xlabel("K")
-    plt.ylabel("D")
+    plt.gca().axes.get_xaxis().set_visible(False)
+    plt.gca().axes.get_yaxis().set_visible(False)
+
+    plt.savefig(target+"our.eps", format=filetype, dpi=dpi)
+
+    plt.figure(figsize=dims)
+    visualize.plot_W(threshold(visualize.sort_W(W_real, W_ref), threshmin=cutoff).T)
+
+    plt.gca().axes.get_xaxis().set_visible(False)
+    plt.gca().axes.get_yaxis().set_visible(False)
+
+    plt.savefig(target+"ref.eps", format=filetype, dpi=dpi)
+
+    plt.figure(figsize=dims)
+    visualize.plot_W(threshold(visualize.sort_W(W_real, W_full), threshmin=cutoff).T)
+
+    plt.gca().axes.get_xaxis().set_visible(False)
+    plt.gca().axes.get_yaxis().set_visible(False)
+
+    plt.savefig(target+"full.eps", format=filetype, dpi=dpi)
 
     bounds_ref = np.load("res/bounds_ref.npy")
     bounds_our = np.load("res/bounds_our.npy")
+    bounds_full = np.load("res/bounds_ref_full.npy")
 
-    plt.figure()
-
-    plt.subplot(2,2,1)
-    plt.plot(list(range(len(bounds_ref))), bounds_ref)
-
-    plt.title("Bounds ref")
-    plt.xlabel("Iter")
-    plt.ylabel("Bound")
-
-    plt.subplot(2,2,2)
-    plt.plot(list(range(len(bounds_our))), bounds_our)
-
-    plt.title("Bounds our")
-    plt.xlabel("Iter")
-    plt.ylabel("Bound")
-
+    # plot zoomed in
     width = 300
 
-    plt.subplot(2,2,3)
+    plt.figure()
     plt.plot(list(range(len(bounds_ref))), bounds_ref)
     plt.ylim([bounds_ref[-1]-width, bounds_ref[-1]+width])
-
     plt.xlabel("Iter")
     plt.ylabel("Bound")
+    plt.savefig(target+"bound_ref.eps", format=filetype, dpi=dpi)
 
-    plt.subplot(2,2,4)
+    plt.figure()
     plt.plot(list(range(len(bounds_our))), bounds_our)
     plt.ylim([bounds_our[-1]-width, bounds_our[-1]+width])
-
     plt.xlabel("Iter")
     plt.ylabel("Bound")
+    plt.savefig(target+"bound_our.eps", format=filetype, dpi=dpi)
 
-    plt.show()
+    plt.figure()
+    plt.plot(list(range(len(bounds_full))), bounds_full)
+    plt.ylim([bounds_full[-1]-width, bounds_full[-1]+width])
+    plt.xlabel("Iter")
+    plt.ylabel("Bound")
+    plt.savefig(target+"bound_full.eps", format=filetype, dpi=dpi)

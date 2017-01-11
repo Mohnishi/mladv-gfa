@@ -9,10 +9,10 @@ cd ../src
 mkdir -p res
 echo "Generation data..."
 # add/remove argument 'full' to use/not use optimization in reference
-python gen_fig3.py full > ../ref/data.r
+python gen_fig3.py > ../ref/data.r
 cd ../ref
 start=`date +%s`
-echo "Running reference GFA..."
+echo "Running reference GFA... (optimization and full rank)"
 Rscript run_convert.r > ../src/fig3_data.py
 end=`date +%s`
 runtime=$((end-start))

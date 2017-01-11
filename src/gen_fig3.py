@@ -6,9 +6,6 @@ from genf import *
 
 if __name__ == '__main__':
     # generate figure 3 similar to one found in the paper
-    full=False
-    if len(sys.argv) > 1:
-        full=True
 
     tau = 10
     R = 3
@@ -41,4 +38,4 @@ if __name__ == '__main__':
     np.save("res/x.npy", X)
     np.save("res/d.npy", D)
 
-    print_to_R(X, D, R, K, full=full)
+    print_to_R(X, D, R, K)

@@ -24,14 +24,14 @@ def sort_W_old(W_real, W_est):
             sim[index_maxi[0], i] = 0
             sim[i,index_maxi[1]] = 0
     return W_est[list_max,:]
-    
-    
-    
-def sort_W(W_real, W_est):   
+
+
+
+def sort_W(W_real, W_est):
     K = W_real.shape[0]
     sim = np.zeros([K,K])
-    
-    # Matrix of similarity 
+
+    # Matrix of similarity
     for i in range(K):
         for j in range(K):
             sim[i,j] = 1 - cosine(np.abs(W_est[i,:]), np.abs(W_real[j,:]))
@@ -47,4 +47,3 @@ def sort_W(W_real, W_est):
             maxi_score = score
             maxi_permu = permu
     return W_est[maxi_permu, :]
-    
