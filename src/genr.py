@@ -4,7 +4,7 @@
 import numpy as np
 from generate_data import *
 
-def print_to_R(X, D, R, K):
+def print_to_R(X, D, R, K, rep):
     # translate to zero mean
     X_mean = X.mean(axis=1, keepdims=True)
     X = X - X_mean
@@ -26,6 +26,7 @@ def print_to_R(X, D, R, K):
     print("Y <- list({})".format(",".join(ys)))
     print("K <- {}".format(K))
     print("R <- {}".format(R))
+    print("rep <- {}".format(rep))
 
     # calling in R:
     # source("CCAGFA.R")

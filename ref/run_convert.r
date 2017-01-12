@@ -18,7 +18,7 @@ opts$dropK <- FALSE
 opts$verbose <- 0
 
 # run GFA
-res <- GFA(Y, K, opts)
+res <- GFAexperiment(Y, K, opts, rep)
 
 # convert W back to python (row major flattening)
 # concatenate W
@@ -42,7 +42,7 @@ opts$dropK <- FALSE
 opts$verbose <- 0
 
 # run GFA
-res_full <- GFA(Y, K, opts)
+res_full <- GFAexperiment(Y, K, opts, rep)
 # W is transposed compared to paper
 W_full <- do.call(rbind, res_full$W)
 cat("W_flat_full = np.array([", paste(c(W_full), collapse=",", sep=""), "])\n", sep="")

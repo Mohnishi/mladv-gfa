@@ -13,6 +13,10 @@ if __name__ == '__main__':
     D = np.array([10,10,10]) #groups     np.array([2,4,4])
     N = 100
 
+    rep = 5
+
+    params = np.array([R, K, rep])
+
     # create filter
     F = gen_filter(len(D))
 
@@ -25,7 +29,7 @@ if __name__ == '__main__':
         for m in range(len(D)):
             #if random.getrandbits(1):
             if F[m,k] == 1:
-                W[k,base:base+D[m]] = np.random.normal(loc=0, scale=3, size=D[m])
+                W[k,base:base+D[m]] = np.random.normal(loc=0, scale=2, size=D[m])
             base += D[m]
 
     # random Z
@@ -37,5 +41,6 @@ if __name__ == '__main__':
     np.save("res/w_real.npy", W)
     np.save("res/x.npy", X)
     np.save("res/d.npy", D)
+    np.save("res/params.npy", params)
 
-    print_to_R(X, D, R, K)
+    print_to_R(X, D, R, K, rep)
