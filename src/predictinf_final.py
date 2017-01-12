@@ -63,7 +63,7 @@ for changegroup in range(0,(groupmax-groupmin)//groupcounter+1,1):
                 preerr=np.sqrt(np.sum(((X.T[:,Leave*Dm:(Leave+1)*Dm]-Xmpre)/(np.max(X.T[:,Leave*Dm:(Leave+1)*Dm])-np.min(X.T[:,Leave*Dm:(Leave+1)*Dm])))**2))  # squared error of the prediction = scaler
                 print(preerr)
                 RMSE[changegroup]=RMSE[changegroup]+preerr  # summing (devided by trialmax afterward)
-                nameoffile=saved_data_when_number_of_group_is
+                nameoffile='saved_data_when_number_of_group_is'
                 numbergroup=str(numM)
                 np.save(nameoffile+numbergroup, RMSE)
                 
