@@ -28,7 +28,7 @@ for changegroup in range(0,(groupmax-groupmin)//groupcounter+1,1):
 
 
         for trial in range(0,trialmax,1):
-                X, W, Z, alpha, Tau = generation(N, K, D, R) # independent trial = data is generated at each trial
+                X, W, Z, alpha, Tau = generation(N, K, D, R,constrain_W=100) # independent trial = data is generated at each trial
                 
                 # Run GFA
 
