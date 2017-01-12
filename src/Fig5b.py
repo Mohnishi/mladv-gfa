@@ -11,7 +11,8 @@ import sys
 datasetindex = int(sys.argv[1])
 rstart = int(sys.argv[2])
 rend = int(sys.argv[3])
-num_datasets = int(sys.argv[4])
+rstep = int(sys.argv[4])
+num_datasets = int(sys.argv[5])
 
 
 M = 50
@@ -26,7 +27,7 @@ rank6_datasets = data['rank-6']
 rank10_datasets = data['rank-10']
 
 
-R = range(rstart,rend+1) #model rank
+R = range(rstart,rend+1,rstep) #model rank
 
 data = [rank2_datasets, rank6_datasets, rank10_datasets]
 
@@ -51,8 +52,8 @@ for r in R: # for all model ranks
 		
 res = np.array(bounds).reshape(-1,num_datasets)
 
-np.save('Fig5b-numdatasets{}-datasetindex{}-modelranks{}-{}'.format(
-    num_datasets, datasetindex, rstart, rend), res)
+np.save('Fig5b-numdatasets{}-datasetindex{}-modelranks{}:{}:{}'.format(
+    num_datasets, datasetindex, rstart, rend, rstep), res)
 
 	
 	
