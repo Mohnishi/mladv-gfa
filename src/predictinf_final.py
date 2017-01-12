@@ -7,7 +7,7 @@ from generate_data import *
 
 groupmax=100 # maximum group number
 groupmin=4  # minimum group number
-groupcounter=10
+groupcounter=5
 RMSE = np.zeros([(groupmax-groupmin)//groupcounter+1,1])  # sequence of RMSE from M=4 to M=100
 trialmax=50 # trial number for average
 
