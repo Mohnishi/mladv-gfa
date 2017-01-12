@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from generate_data import *
 
-groupmax=40 # maximum group number
+groupmax=100 # maximum group number
 groupmin=4  # minimum group number
-groupcounter=5
+groupcounter=10
 RMSE = np.zeros([(groupmax-groupmin)//groupcounter+1,1])  # sequence of RMSE from M=4 to M=100
 trialmax=5 # trial number for average
 
