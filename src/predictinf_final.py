@@ -21,7 +21,7 @@ for changegroup in range(0,(groupmax-groupmin)//groupcounter+1,1):
         K = 18 #factors
         numM = changegroup*groupcounter+groupmin # number of groups
         Dm = 7 # dimension of each group
-        D = Dm*np.ones(numM) #groups
+        D = Dm*np.ones(numM,dtype=int) #groups
         scalerD=Dm*numM
         N = 30 #samples
         R = 4#min(K,numM)#4 #rank
