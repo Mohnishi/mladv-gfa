@@ -15,7 +15,7 @@ rend = int(sys.argv[3])
 
 M = 50
 Dm = 10 
-D = Dm*np.ones(M)
+D = Dm*np.ones(M,dtype = int)
 
 
 with open('data-fig5.pkl', 'rb') as f:
