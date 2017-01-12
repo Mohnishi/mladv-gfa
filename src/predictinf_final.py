@@ -9,7 +9,7 @@ groupmax=100 # maximum group number
 groupmin=4  # minimum group number
 groupcounter=10
 RMSE = np.zeros([(groupmax-groupmin)//groupcounter+1,1])  # sequence of RMSE from M=4 to M=100
-trialmax=5 # trial number for average
+trialmax=50 # trial number for average
 
 
 
@@ -32,7 +32,7 @@ for changegroup in range(0,(groupmax-groupmin)//groupcounter+1,1):
                 
                 # Run GFA
 
-                g = gfa.GFA_rep(X,D, n=1, debug_iter=False, rank=R, factors=K,optimize_method="l-bfgs-b", debug=False, max_iter=100)
+                g = gfa.GFA_rep(X,D, n=5, debug_iter=False, rank=R, factors=K,optimize_method="l-bfgs-b", debug=False, max_iter=10000)
                
                # while W.max()>10000:
                 #        g = gfa.GFA_rep(X,D, n=1, debug_iter=False, rank=R, factors=K,optimize_method="l-bfgs-b", debug=False, max_iter=100)
