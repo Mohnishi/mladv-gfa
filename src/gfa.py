@@ -101,6 +101,7 @@ class GFA:
         self.update_tau()
 
     def init(self, X, D):
+        D = D.astype(int)
         assert D.sum() == X.shape[0]
 
         self.groups = len(D)
