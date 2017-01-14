@@ -87,12 +87,12 @@ for r_index in range(len(R_array)):
     NSRMSE[r_index] /= num_datasets
         
 
-np.save('Fig5a-numdatasets{}-datasetindex{}-modelranks{}:{}:{}-yaxis'.format(
+np.save('Fig5a-numdatasets{}-datasetindex{}-modelranks{}-{}-{}-yaxis'.format(
     num_datasets, datasetindex, rstart, rend, rstep), RMSE)
-np.save('Fig5a-numdatasets{}-datasetindex{}-modelranks{}:{}:{}-yaxis-N'.format(
+np.save('Fig5a-numdatasets{}-datasetindex{}-modelranks{}-{}-{}-yaxis-N'.format(
     num_datasets, datasetindex, rstart, rend, rstep), NRMSE)
-np.save('Fig5a-numdatasets{}-datasetindex{}-modelranks{}:{}:{}-yaxis-NS'.format(
+np.save('Fig5a-numdatasets{}-datasetindex{}-modelranks{}-{}-{}-yaxis-NS'.format(
     num_datasets, datasetindex, rstart, rend, rstep), NSRMSE)
-np.save('Fig5a-numdatasets{}-datasetindex{}-modelranks{}:{}:{}-xaxis'.format(
-    num_datasets, datasetindex, rstart, rend, rstep), R_array)
+np.save('Fig5a-numdatasets{}-datasetindex{}-modelranks{}-{}-{}-xaxis'.format(
+    num_datasets, datasetindex, rstart, rend, rstep), np.array(R_array))
 

@@ -11,13 +11,13 @@ rstep = int(sys.argv[4])
 num_datasets = int(sys.argv[5])
 
 
-RMSE = np.load('Fig5a-numdatasets{}-datasetindex{}-modelranks{}:{}:{}-yaxis.npy'.format(
+RMSE = np.load('Fig5a-numdatasets{}-datasetindex{}-modelranks{}-{}-{}-yaxis.npy'.format(
     num_datasets, datasetindex, rstart, rend, rstep))
-NRMSE = np.load('Fig5a-numdatasets{}-datasetindex{}-modelranks{}:{}:{}-yaxis-N.npy'.format(
+NRMSE = np.load('Fig5a-numdatasets{}-datasetindex{}-modelranks{}-{}-{}-yaxis-N.npy'.format(
     num_datasets, datasetindex, rstart, rend, rstep))
-NSRMSE = np.load('Fig5a-numdatasets{}-datasetindex{}-modelranks{}:{}:{}-yaxis-NS.npy'.format(
+NSRMSE = np.load('Fig5a-numdatasets{}-datasetindex{}-modelranks{}-{}-{}-yaxis-NS.npy'.format(
     num_datasets, datasetindex, rstart, rend, rstep))
-R_array = np.load('Fig5a-numdatasets{}-datasetindex{}-modelranks{}:{}:{}-xaxis.npy'.format(
+R_array = np.load('Fig5a-numdatasets{}-datasetindex{}-modelranks{}-{}-{}-xaxis.npy'.format(
     num_datasets, datasetindex, rstart, rend, rstep))
 
 
