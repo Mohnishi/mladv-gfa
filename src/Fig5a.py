@@ -64,7 +64,8 @@ for r_index in range(len(R_array)):
         Sigma=np.identity(K) # K x K
         Wm=g.E_W(leave) # K x Dm               
                     
-        X_unseen = X_test[leave * Dm:(leave+1) * Dm, :]
+        X_unseen = X_test[leave * Dm:(leave+1) * Dm, :].T
+        # (N_test, Dm)
         
         count=0
         for i in range(0,numM,1):
@@ -75,7 +76,8 @@ for r_index in range(len(R_array)):
                     Sigma=Sigma+g.E_tau(i)*g.E_WW(i) # I_k+\sum_{j\neqm}<tau_j><W^(j){W^(j)}^{T}>
                     Wminus=np.c_[Wminus,g.E_W(i)] # Finally K x D-Dm 
                     
-        Xmpre = Yminus @ T @ Wminus.T @ np.linalg.pinv(Sigma) @ Wm  # (N x D-Dm)x(D-Dm x D-Dm)x(D-Dm x K)x(K x K)x(K x Dm)=(N x Dm)
+        Xmpre = Yminus @ T @ Wminus.T @ np.linalg.pinv(Sigma) @ Wm  
+        # (N_test x Dm) = (N_test x D-Dm)x(D-Dm x D-Dm)x(D-Dm x K)x(K x K)x(K x Dm)
         
         maxi = X_unseen.max()
         mini = X_unseen.min()
