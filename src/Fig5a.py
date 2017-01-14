@@ -17,8 +17,8 @@ num_datasets = int(sys.argv[5])
 
 R_array = range(rstart,rend+1,rstep) #model rank
 RMSE = np.zeros([len(R_array),1])  # sequence of RMSE
-RMSE_unscaled = np.zeros([len(R_array),1])  # sequence of RMSE
-
+NRMSE = np.zeros([len(R_array),1])  # sequence of RMSE (normalized)
+NSRMSE = np.zeros([len(R_array),1])  # sequence of RMSE (normalized with squared denominator)
 
 
 with open('data-fig5.pkl', 'rb') as f:
@@ -33,10 +33,10 @@ datasets = data[datasetindex]
 K = 30       # factors
 numM = 50    # number of groups
 Dm = 10      # dimension of each group
-D = Dm * np.ones(numM) #groups
+D = Dm * np.ones(numM, dtype=int) #groups
 scalerD=Dm * numM
 N_test = 10
-N_train = 40      # samples
+N_train = 40
 N_total = N_train + N_test
 
 
@@ -49,7 +49,7 @@ for r_index in range(len(R_array)):
         X_train = X[:,0:N_train]
         X_test = X[:,N_train:N_total]          
         
-        g = gfa.GFA_rep(X_train, D, n=1, debug_iter=False, rank=R_array[r_index], factors=K, optimize_method="l-bfgs-b", debug=True, max_iter=30)
+        g = gfa.GFA_rep(X_train, D, n=5, debug_iter=False, rank=R_array[r_index], factors=K, optimize_method="l-bfgs-b", debug=True, max_iter=10000)
         
         leave = 0
                     
@@ -76,16 +76,23 @@ for r_index in range(len(R_array)):
         
         maxi = X_unseen.max()
         mini = X_unseen.min()
-        preerr = np.sqrt(np.sum( ((X_unseen - Xmpre) / (maxi - mini))**2))  # squared error of the prediction = scaler
-        preerr_unscaled = np.sum((X_unseen - Xmpre)**2)
+        preerr = np.sqrt(np.sum((X_unseen - Xmpre)**2))
+        preerr_part_scaled = np.sqrt(np.sum((X_unseen - Xmpre)**2) / (maxi - mini))
+        preerr_scaled = np.sqrt(np.sum( ((X_unseen - Xmpre) / (maxi - mini))**2))
         RMSE[r_index] += preerr
+        NRMSE[r_index] += preerr_part_scaled        
+        NSRMSE[r_index] += preerr_scaled
     RMSE[r_index] /= num_datasets
+    NRMSE[r_index] /= num_datasets
+    NSRMSE[r_index] /= num_datasets
         
-        
-np.save('rmse', RMSE)
-np.save('rmse_r', R_array)
 
+np.save('Fig5a-numdatasets{}-datasetindex{}-modelranks{}:{}:{}-yaxis'.format(
+    num_datasets, datasetindex, rstart, rend, rstep), RMSE)
+np.save('Fig5a-numdatasets{}-datasetindex{}-modelranks{}:{}:{}-yaxis-N'.format(
+    num_datasets, datasetindex, rstart, rend, rstep), NRMSE)
+np.save('Fig5a-numdatasets{}-datasetindex{}-modelranks{}:{}:{}-yaxis-NS'.format(
+    num_datasets, datasetindex, rstart, rend, rstep), NSRMSE)
+np.save('Fig5a-numdatasets{}-datasetindex{}-modelranks{}:{}:{}-xaxis'.format(
+    num_datasets, datasetindex, rstart, rend, rstep), R_array)
 
-plt.figure(1)
-plt.plot(R_array, RMSE)
-plt.show()
