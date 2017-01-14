@@ -20,6 +20,7 @@ RMSE = np.zeros([len(R_array),1])  # sequence of RMSE
 NRMSE = np.zeros([len(R_array),1])  # sequence of RMSE (normalized)
 NSRMSE = np.zeros([len(R_array),1])  # sequence of RMSE (normalized with squared denominator)
 
+print(np.asarray(R_array))
 
 with open('data-fig5.pkl', 'rb') as f:
     data = pickle.load(f)
@@ -49,7 +50,9 @@ for r_index in range(len(R_array)):
         X_train = X[:,0:N_train]
         X_test = X[:,N_train:N_total]          
         
-        g = gfa.GFA_rep(X_train, D, n=5, debug_iter=False, rank=R_array[r_index], factors=K, optimize_method="l-bfgs-b", debug=True, max_iter=10000)
+        #g = gfa.GFA_rep(X_train, D, n=5, debug_iter=False, rank=R_array[r_index], factors=K, optimize_method="l-bfgs-b", debug=True, max_iter=10000)
+        g = gfa.GFA(debug=True, max_iter=10000, factors = K, rank = R_array[r_index])
+        g.fit(X_train,D)
         
         leave = 0
                     
