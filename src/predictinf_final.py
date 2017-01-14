@@ -5,17 +5,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 from generate_data import *
 
-groupmax=45 # maximum group number
+groupmax=40 # maximum group number
 groupmin=4  # minimum group number
-groupcounter=5
+groupcounter=2
 RMSE = np.zeros([(groupmax-groupmin)//groupcounter+1,1])  # sequence of RMSE from M=4 to M=100
 trialmax=50 # trial number for average
 
 
 
 for changegroup in range(0,(groupmax-groupmin)//groupcounter+1,1):
-        if changegroup==8:
-                numM=100
         # Create Corentin's artifical data set corresponding to Experiment C (original paper)
         Leave = 0 # group which we will leave for prediction
         
@@ -33,7 +31,7 @@ for changegroup in range(0,(groupmax-groupmin)//groupcounter+1,1):
                 
                 # Run GFA
 
-                g = gfa.GFA_rep(X,D, n=1, debug_iter=False, rank=R, factors=K,optimize_method="l-bfgs-b", debug=False, max_iter=100)
+                g = gfa.GFA_rep(X,D, n=1, debug_iter=False, rank=R, factors=K,optimize_method="l-bfgs-b", debug=False, max_iter=1000)
                
                # while W.max()>10000:
                 #        g = gfa.GFA_rep(X,D, n=1, debug_iter=False, rank=R, factors=K,optimize_method="l-bfgs-b", debug=False, max_iter=100)
