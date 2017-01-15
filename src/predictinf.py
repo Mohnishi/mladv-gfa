@@ -7,7 +7,7 @@ from generate_data import *
 
 groupmax=40 # maximum group number
 groupmin=4  # minimum group number
-groupcounter=5
+groupcounter=2
 RMSE = np.zeros([(groupmax-groupmin)//groupcounter+1,1])  # sequence of RMSE from M=4 to M=100
 trialmax=50 # trial number for average
 
@@ -26,19 +26,13 @@ def run_RMSE(rank, save=True):
             if rank == None:
                 R = numM
 
-            X, W, Z, alpha, Tau = generation(N, K, D, 4,constrain_W=10) # independent trial = data is generated at each trial
-
-                    # Run GFA
-
-            g = gfa.GFA_rep(X,D, n=1, debug_iter=False, rank=R, factors=K,optimize_method="l-bfgs-b", debug=False, max_iter=20)
-            
+            Xall, W, Z, alpha, Tau = generation(N*(trialmax+1), K, D, 4,constrain_W=10) # independent trial = data is generated at each trial
+               # Run GFA
+            g = gfa.GFA_rep(Xall[:,0:N],D, n=1, debug_iter=False, rank=R, factors=K,optimize_method="l-bfgs-b", debug=False, max_iter=1000)
+           
             for trial in range(0,trialmax,1):
-                    X, W, Z, alpha, Tau = generation(N, K, D, 4,constrain_W=10) # independent trial = data is generated at each trial
-
-                    # Run GFA
-
-                    #g = gfa.GFA_rep(X,D, n=1, debug_iter=False, rank=R, factors=K,optimize_method="l-bfgs-b", debug=False, max_iter=20)
-
+                   
+                    X=Xall[:,(trial+1)*N:(trial+2)*N]
                    # while W.max()>10000:
                     #        g = gfa.GFA_rep(X,D, n=1, debug_iter=False, rank=R, factors=K,optimize_method="l-bfgs-b", debug=False, max_iter=100)
 
@@ -76,6 +70,7 @@ def run_RMSE(rank, save=True):
 
 if __name__ == '__main__':
     RMSE_full = run_RMSE(None)
+    RMSE = np.zeros([(groupmax-groupmin)//groupcounter+1,1]) 
     RMSE_4 = run_RMSE(4)
 
     # Visualize the result
