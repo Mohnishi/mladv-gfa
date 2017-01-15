@@ -13,7 +13,7 @@ if __name__ == '__main__':
     D = np.array([10,10,10]) #groups     np.array([2,4,4])
     N = 100
 
-    rep = 5
+    rep = 1
 
     params = np.array([R, K, rep])
 

@@ -18,7 +18,9 @@ opts$dropK <- FALSE
 opts$verbose <- 0
 
 # run GFA
+ptm <- Sys.time()
 res <- GFAexperiment(Y, K, opts, rep)
+end1 <- Sys.time() - ptm
 
 # convert W back to python (row major flattening)
 # concatenate W
@@ -42,7 +44,10 @@ opts$dropK <- FALSE
 opts$verbose <- 0
 
 # run GFA
+ptm <- Sys.time()
 res_full <- GFAexperiment(Y, K, opts, rep)
+end2 <- Sys.time() - ptm
+
 # W is transposed compared to paper
 W_full <- do.call(rbind, res_full$W)
 cat("W_flat_full = np.array([", paste(c(W_full), collapse=",", sep=""), "])\n", sep="")
@@ -51,3 +56,9 @@ cat("np.save('res/w_ref_full.npy', W_full)\n")
 
 cat("bounds_full = np.array([", paste(res_full$cost,  collapse=",", sep=""), "])\n", sep="")
 cat("np.save('res/bounds_ref_full.npy', bounds_full)\n")
+
+times <- list(end1, end2)
+cat("times = np.array([", paste(times, collapse=",", sep=""), "])\n", sep="")
+
+cat("old = np.load('res/times_ref.npy')\n")
+cat("np.save('res/times_ref.npy', old+times)")

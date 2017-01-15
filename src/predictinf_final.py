@@ -1,9 +1,9 @@
-import importlib
 import gfa
-importlib.reload(gfa)
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 from generate_data import *
+from sklearn.metrics import mean_squared_error
 
 groupmax=40 # maximum group number
 groupmin=4  # minimum group number
@@ -26,12 +26,13 @@ def run_RMSE(rank, save=True):
             if rank == None:
                 R = numM
 
+            # generate indepdent datasets
             for trial in range(0,trialmax,1):
                     X, W, Z, alpha, Tau = generation(N, K, D, R,constrain_W=10) # independent trial = data is generated at each trial
 
                     # Run GFA
 
-                    g = gfa.GFA_rep(X,D, n=1, debug_iter=False, rank=R, factors=K,optimize_method="l-bfgs-b", debug=False, max_iter=500)
+                    g = gfa.GFA_rep(X,D, n=1, debug_iter=False, rank=R, factors=K,optimize_method="l-bfgs-b", debug=False, max_iter=10)
 
                    # while W.max()>10000:
                     #        g = gfa.GFA_rep(X,D, n=1, debug_iter=False, rank=R, factors=K,optimize_method="l-bfgs-b", debug=False, max_iter=100)
@@ -64,9 +65,9 @@ def run_RMSE(rank, save=True):
                     RMSE[changegroup]=RMSE[changegroup]+preerr  # summing (devided by trialmax afterward)
 
                     if save:
-                        np.save("backup.npy", RMSE)
+                        np.save("res/backup-{}.npy".format(rank), RMSE)
 
-    return RMSE/float(trialmax)  # averaging
+    return RMSE/trialmax  # averaging
 
 if __name__ == '__main__':
     RMSE_full = run_RMSE(None)
@@ -74,6 +75,10 @@ if __name__ == '__main__':
 
     # Visualize the result
     plt.figure()
+
+    red_patch = mpatches.Patch(color='red', label='R = 4')
+    blue_patch = mpatches.Patch(color='blue', label='R = M')
+    plt.legend(handles=[red_patch])
     plt.plot(range(groupmin,groupmax+1,groupcounter),RMSE_4,color='r',linewidth=3)
     plt.plot(range(groupmin,groupmax+1,groupcounter),RMSE_full,color='b',linewidth=3)
 
