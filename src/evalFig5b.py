@@ -1,9 +1,5 @@
-import importlib
-import gfa
-importlib.reload(gfa)
 import numpy as np
 import matplotlib.pyplot as plt
-from generate_data import *
 import visualize
 import pickle
 import sys 
@@ -27,15 +23,15 @@ plt1, = plt.plot(modelrank, average1,'-o',color='red')
 plt2, = plt.plot(modelrank, average2,'-o',color='green')
 
 plt.scatter(6, average1[correct_rank_6], s=1, c='b')
-plt.scatter(6, average1[correct_rank_6], s=500, c='w')
+plt3 = plt.scatter([6,10], [average1[correct_rank_6], average2[correct_rank_10]], s=[500,500], c='w')
 plt.scatter(10, average2[correct_rank_10], s=1, c='b')
-plt.scatter(10, average2[correct_rank_10], s=500, c='w')
+#plt.scatter(10, average2[correct_rank_10], s=500, c='w')
 
 pylab.xlim([0,18])
 
 plt.xlabel('Model rank', fontsize='20')
 plt.ylabel('Lower bound', fontsize='20')
 
-plt.legend((plt1, plt2), ('Data rank 6', 'Data rank 10'),loc = 'lower right', fontsize='20')
+plt.legend((plt1, plt2, plt3), ('Data rank 6', 'Data rank 10', 'Correct rank'),loc = 'lower right', fontsize='20', scatterpoints = 1)
 
 plt.show()
