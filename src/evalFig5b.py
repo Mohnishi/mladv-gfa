@@ -17,8 +17,9 @@ modelrank = np.array([2, 4, 6, 8, 10, 12, 14, 16])
 correct_rank_6 = np.argwhere(modelrank == 6)[0]
 correct_rank_10 = np.argwhere(modelrank == 10)[0]
 
-plt.figure(1)
-
+f = plt.figure(1)
+ax = f.add_subplot(111)
+ax.yaxis.tick_right()
 plt1, = plt.plot(modelrank, average1,'-o',color='red')
 plt2, = plt.plot(modelrank, average2,'-o',color='green')
 
