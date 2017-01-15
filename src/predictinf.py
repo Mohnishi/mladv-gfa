@@ -29,7 +29,7 @@ def run_RMSE(rank, save=True):
 
             Xall, W, Z, alpha, Tau = generation(N*(trialmax+1), K, D, 4,constrain_W=10) # independent trial = data is generated at each trial
                # Run GFA
-            g = gfa.GFA_rep(Xall[:,0:N],D, n=1, debug_iter=False, rank=R, factors=K,optimize_method="l-bfgs-b", debug=False, max_iter=1000)
+            g = gfa.GFA_rep(Xall[:,0:N],D, n=1, debug_iter=False, rank=R, factors=K,optimize_method="l-bfgs-b", debug=False, max_iter=200)
 
             for trial in range(0,trialmax,1):
 
@@ -65,9 +65,9 @@ def run_RMSE(rank, save=True):
                     RMSE[changegroup]=RMSE[changegroup]+preerr  # summing (devided by trialmax afterward)
 
                     if save:
-                        np.save("backup.npy", RMSE)
+                        np.save("backup-{}.npy".format(rank), RMSE)
 
-    return RMSE/float(trialmax)  # averaging
+    return RMSE/trialmax  # averaging
 
 if __name__ == '__main__':
     RMSE_full = run_RMSE(None)
