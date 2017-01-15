@@ -31,7 +31,7 @@ plt.scatter(6, average1[correct_rank_6], s=500, c='w')
 plt.scatter(10, average2[correct_rank_10], s=1, c='b')
 plt.scatter(10, average2[correct_rank_10], s=500, c='w')
 
-pylab.xlim([0,20])
+pylab.xlim([0,18])
 
 plt.xlabel('Model rank', fontsize='20')
 plt.ylabel('Lower bound', fontsize='20')
