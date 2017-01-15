@@ -107,3 +107,22 @@ def generation(N, K, D, R, constrain_W=np.inf, fixed_tau=0.1):
     Z = generate_z(K,N)
     X = generate_x(Z, W, D, Tau, N)
     return X, W, Z, alpha, Tau
+
+def generate_fig4(N, K, D, constrain_W=np.inf, fixed_tau=0.1):
+    """ Complete generation of the data
+    Output :
+    Size X = D x N
+    Size W = D x K
+    Size Z = K x N
+    """
+    M = len(D)
+    U, V = generate_UV(M, K, R)
+    alpha = np.zeros(M, k)
+    W = get_w(D, alpha, constrain_W=constrain_W)
+    if fixed_tau:
+        Tau = np.array([fixed_tau] * M)
+    else:
+        Tau = generate_tau(D)
+    Z = generate_z(K,N)
+    X = generate_x(Z, W, D, Tau, N)
+    return X
