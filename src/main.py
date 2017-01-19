@@ -1,1 +1,5 @@
-print("Hello world")
+
+
+print("Hej")
+
+print("Docker Test")
